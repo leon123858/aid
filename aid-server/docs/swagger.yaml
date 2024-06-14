@@ -1,0 +1,60 @@
+basePath: /
+host: 127.0.0.1:8080
+info:
+  contact:
+    email: a0970785699@gmail.com
+    name: Leon Lin
+    url: github.com/leon123858
+  description: This is a AID server implementation for my paper.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: AID API Server
+  version: "1.0"
+paths:
+  /api/login:
+    post:
+      consumes:
+      - application/json
+      description: Login
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login
+          schema:
+            type: string
+      summary: Login
+      tags:
+      - Auth
+  /api/logout:
+    post:
+      consumes:
+      - application/json
+      description: Logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Logout
+          schema:
+            type: string
+      summary: Logout
+      tags:
+      - Auth
+  /api/register:
+    post:
+      consumes:
+      - application/json
+      description: Register
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Register
+          schema:
+            type: string
+      summary: Register
+      tags:
+      - Auth
+swagger: "2.0"
