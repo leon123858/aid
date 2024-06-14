@@ -1,8 +1,14 @@
 package main
 
-import "aid-server/cmd"
+import (
+	"aid-server/cmd"
+	"fmt"
+	"os"
+)
 
 func main() {
-	// execute cli
-	cmd.Execute()
+	if err := cmd.Execute(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
 }

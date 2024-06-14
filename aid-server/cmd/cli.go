@@ -4,11 +4,9 @@ import (
 	"aid-server/configs"
 	"aid-server/server"
 	"errors"
-	"fmt"
 	"github.com/spf13/cobra"
 	"net"
 	"net/http"
-	"os"
 )
 
 var rootCmd = &cobra.Command{
@@ -22,7 +20,11 @@ var serverCmd = &cobra.Command{
 	Short: "Start the AID web server",
 	Long:  "Start the AID web server and handle incoming requests.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		return serve()
+		ln, err := net.Listen("tcp", net.JoinHostPort(configs.Configs.Host.Host, configs.Configs.Host.Port))
+		if err != nil {
+			return err
+		}
+		return serve(ln, server.Serve)
 	},
 }
 
@@ -30,13 +32,8 @@ func init() {
 	rootCmd.AddCommand(serverCmd)
 }
 
-func serve() error {
-	ln, err := net.Listen("tcp", net.JoinHostPort(configs.Configs.Host.Host, configs.Configs.Host.Port))
-	if err != nil {
-		return err
-	}
-
-	err = server.Serve(ln)
+func serve(listener net.Listener, serveFunc func(ln net.Listener) error) error {
+	err := serveFunc(listener)
 	if errors.Is(err, http.ErrServerClosed) {
 		return nil
 	}
@@ -44,9 +41,6 @@ func serve() error {
 	return err
 }
 
-func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
+func Execute() error {
+	return rootCmd.Execute()
 }
