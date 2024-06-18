@@ -1,4 +1,57 @@
 basePath: /
+definitions:
+  server.AskRequest:
+    properties:
+      browser:
+        type: string
+      ip:
+        type: string
+    type: object
+  server.LoginRequest:
+    properties:
+      aid:
+        type: string
+      browser:
+        type: string
+      ip:
+        type: string
+      sign:
+        type: string
+    type: object
+  server.LogoutRequest:
+    properties:
+      aid:
+        type: string
+      browser:
+        type: string
+      ip:
+        type: string
+    type: object
+  server.RegisterRequest:
+    properties:
+      aid:
+        type: string
+      browser:
+        type: string
+      ip:
+        type: string
+      publicKey:
+        type: string
+    type: object
+  server.Response:
+    properties:
+      content:
+        type: string
+      result:
+        type: boolean
+    type: object
+  server.TriggerRequest:
+    properties:
+      browser:
+        type: string
+      ip:
+        type: string
+    type: object
 host: 127.0.0.1:8080
 info:
   contact:
@@ -12,18 +65,47 @@ info:
   title: AID API Server
   version: "1.0"
 paths:
+  /api/ask:
+    post:
+      consumes:
+      - application/json
+      description: Ask
+      parameters:
+      - description: Ask Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/server.AskRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: aid string
+          schema:
+            $ref: '#/definitions/server.Response'
+      summary: Ask
+      tags:
+      - Auth
   /api/login:
     post:
       consumes:
       - application/json
       description: Login
+      parameters:
+      - description: Login Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/server.LoginRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Login
+          description: JWT Token
           schema:
-            type: string
+            $ref: '#/definitions/server.Response'
       summary: Login
       tags:
       - Auth
@@ -32,13 +114,20 @@ paths:
       consumes:
       - application/json
       description: Logout
+      parameters:
+      - description: Logout Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/server.LogoutRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Logout
+          description: empty string
           schema:
-            type: string
+            $ref: '#/definitions/server.Response'
       summary: Logout
       tags:
       - Auth
@@ -47,14 +136,43 @@ paths:
       consumes:
       - application/json
       description: Register
+      parameters:
+      - description: Register Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/server.RegisterRequest'
       produces:
       - application/json
       responses:
         "200":
-          description: Register
+          description: empty string
           schema:
-            type: string
+            $ref: '#/definitions/server.Response'
       summary: Register
+      tags:
+      - Auth
+  /api/trigger:
+    post:
+      consumes:
+      - application/json
+      description: Trigger
+      parameters:
+      - description: Trigger Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/server.TriggerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: aid string
+          schema:
+            $ref: '#/definitions/server.Response'
+      summary: Trigger
       tags:
       - Auth
 swagger: "2.0"

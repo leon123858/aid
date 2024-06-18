@@ -27,6 +27,5 @@ type Time struct {
 
 type DeviceFingerPrint struct {
 	IP   string
-	OS   string
 	Brow string
 }

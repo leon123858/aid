@@ -45,7 +45,6 @@ func (m *MockDB) Delete(key string) error {
 
 var defaultDeviceFingerPrint = DeviceFingerPrint{
 	IP:   "127.0.0.1",
-	OS:   "Windows",
 	Brow: "Chrome",
 }
 

@@ -17,6 +17,40 @@
     "host": "127.0.0.1:8080",
     "basePath": "/",
     "paths": {
+        "/api/ask": {
+            "post": {
+                "description": "Ask",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Ask",
+                "parameters": [
+                    {
+                        "description": "Ask Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.AskRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "aid string",
+                        "schema": {
+                            "$ref": "#/definitions/server.Response"
+                        }
+                    }
+                }
+            }
+        },
         "/api/login": {
             "post": {
                 "description": "Login",
@@ -30,11 +64,22 @@
                     "Auth"
                 ],
                 "summary": "Login",
+                "parameters": [
+                    {
+                        "description": "Login Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.LoginRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Login",
+                        "description": "JWT Token",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/server.Response"
                         }
                     }
                 }
@@ -53,11 +98,22 @@
                     "Auth"
                 ],
                 "summary": "Logout",
+                "parameters": [
+                    {
+                        "description": "Logout Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.LogoutRequest"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "Logout",
+                        "description": "empty string",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/server.Response"
                         }
                     }
                 }
@@ -76,13 +132,141 @@
                     "Auth"
                 ],
                 "summary": "Register",
-                "responses": {
-                    "200": {
-                        "description": "Register",
+                "parameters": [
+                    {
+                        "description": "Register Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/server.RegisterRequest"
                         }
                     }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "empty string",
+                        "schema": {
+                            "$ref": "#/definitions/server.Response"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/trigger": {
+            "post": {
+                "description": "Trigger",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Trigger",
+                "parameters": [
+                    {
+                        "description": "Trigger Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/server.TriggerRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "aid string",
+                        "schema": {
+                            "$ref": "#/definitions/server.Response"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "server.AskRequest": {
+            "type": "object",
+            "properties": {
+                "browser": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
+                }
+            }
+        },
+        "server.LoginRequest": {
+            "type": "object",
+            "properties": {
+                "aid": {
+                    "type": "string"
+                },
+                "browser": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
+                },
+                "sign": {
+                    "type": "string"
+                }
+            }
+        },
+        "server.LogoutRequest": {
+            "type": "object",
+            "properties": {
+                "aid": {
+                    "type": "string"
+                },
+                "browser": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
+                }
+            }
+        },
+        "server.RegisterRequest": {
+            "type": "object",
+            "properties": {
+                "aid": {
+                    "type": "string"
+                },
+                "browser": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
+                },
+                "publicKey": {
+                    "type": "string"
+                }
+            }
+        },
+        "server.Response": {
+            "type": "object",
+            "properties": {
+                "content": {
+                    "type": "string"
+                },
+                "result": {
+                    "type": "boolean"
+                }
+            }
+        },
+        "server.TriggerRequest": {
+            "type": "object",
+            "properties": {
+                "browser": {
+                    "type": "string"
+                },
+                "ip": {
+                    "type": "string"
                 }
             }
         }

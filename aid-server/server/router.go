@@ -41,6 +41,8 @@ func generateRouter() *echo.Echo {
 		api.POST("/login", login)
 		api.POST("/logout", logout)
 		api.POST("/register", register)
+		api.POST("/ask", ask)
+		api.POST("/trigger", trigger)
 	}
 
 	return router

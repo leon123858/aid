@@ -1,4 +1,5 @@
 all:
+	make swag
 	make fmt
 	make run
 
