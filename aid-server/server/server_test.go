@@ -3,10 +3,28 @@ package server
 import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
+	"os"
 	"syscall"
 	"testing"
 	"time"
 )
+
+func TestMain(m *testing.M) {
+	// 在這裡執行所有測試之前的設置操作
+	// ...
+
+	// 運行實際的測試函數
+	code := m.Run()
+
+	// 在這裡執行所有測試之後的清理操作
+	err := os.RemoveAll("data")
+	if err != nil {
+		panic(err)
+	}
+
+	// 退出測試
+	os.Exit(code)
+}
 
 func TestSetGracefulShutdown(t *testing.T) {
 	// 創建一個模擬的 http.Server

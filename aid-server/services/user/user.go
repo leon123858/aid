@@ -7,6 +7,7 @@ import (
 )
 
 type IUser interface {
+	IsExist() bool
 	GetAID() uuid.UUID
 	GetSpace() *Space
 	GetTime() *Time
@@ -54,6 +55,7 @@ func CreateUser(aid uuid.UUID, db ldb.DB) (IUser, error) {
 				Space: Space{},
 				Time:  Time{},
 			},
+			IsExisted: false,
 		}, nil
 	}
 	data, err := db.Get(aid.String())
@@ -65,10 +67,15 @@ func CreateUser(aid uuid.UUID, db ldb.DB) (IUser, error) {
 		return nil, err
 	}
 	return &User{
-		ID:   aid,
-		DB:   db,
-		Data: d,
+		ID:        aid,
+		DB:        db,
+		Data:      d,
+		IsExisted: true,
 	}, nil
+}
+
+func (u *User) IsExist() bool {
+	return u.IsExisted
 }
 
 func (u *User) GetAID() uuid.UUID {

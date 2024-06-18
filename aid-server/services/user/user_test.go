@@ -115,7 +115,7 @@ func TestUser_SetTime(t *testing.T) {
 		},
 	}
 	newTime := Time{
-		preLoginTime: time.Now(),
+		PreLoginTime: time.Now(),
 	}
 	db.On("Set", aid.String(), mock.AnythingOfType("string")).Return(nil)
 	err := u.SetTime(newTime)
@@ -140,7 +140,7 @@ func TestUser_SetAll(t *testing.T) {
 			DeviceFingerPrint: defaultDeviceFingerPrint,
 		},
 		Time: Time{
-			preLoginTime: time.Now(),
+			PreLoginTime: time.Now(),
 		},
 	}
 	db.On("Set", aid.String(), mock.AnythingOfType("string")).Return(nil)
@@ -155,8 +155,32 @@ func TestUser_SetAll(t *testing.T) {
 func TestNewDB(t *testing.T) {
 	db, err := NewDB("test")
 	assert.NoError(t, err)
-	err = db.Close()
+	err = FreeDB(db)
 	assert.NoError(t, err)
 	err = os.RemoveAll("test.ldb")
 	assert.Nil(t, err)
+}
+
+func TestUser_IsExist(t *testing.T) {
+	db := new(MockDB)
+	aid := uuid.New()
+	db.On("IsExist", aid.String()).Return(true, nil)
+	db.On("Get", aid.String()).Return(`{"Space":{},"Time":{}}`, nil)
+	u, err := CreateUser(aid, db)
+	assert.NoError(t, err)
+	assert.NotNil(t, u)
+	assert.True(t, u.IsExist())
+	db.AssertExpectations(t)
+}
+
+func TestUser_IsNotExist(t *testing.T) {
+	db := new(MockDB)
+	aid := uuid.New()
+	db.On("IsExist", aid.String()).Return(false, nil)
+	db.On("Set", aid.String(), mock.AnythingOfType("string")).Return(nil)
+	u, err := CreateUser(aid, db)
+	assert.NoError(t, err)
+	assert.NotNil(t, u)
+	assert.False(t, u.IsExist())
+	db.AssertExpectations(t)
 }

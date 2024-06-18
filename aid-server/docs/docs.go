@@ -151,7 +151,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "empty string",
+                        "description": "aid string",
                         "schema": {
                             "$ref": "#/definitions/server.Response"
                         }

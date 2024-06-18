@@ -1,6 +1,9 @@
 package server
 
 import (
+	"aid-server/pkg/rsa"
+	"encoding/json"
+	"github.com/google/uuid"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -38,7 +41,23 @@ func TestLogout(t *testing.T) {
 
 func TestRegister(t *testing.T) {
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/api/register", strings.NewReader(`{"aid":"testAID","publicKey":"testPublicKey","ip":"127.0.0.1","browser":"Chrome"}`))
+	_, key := rsa.GenerateRSAKeyPair()
+	pubKey := rsa.MarshalPublicKey(key)
+	body := RegisterRequest{
+		AID:       uuid.New().String(),
+		PublicKey: string(pubKey),
+		Request: Request{
+			Space: Space{
+				IP:      "127.0.0.1",
+				Browser: "Chrome",
+			},
+		},
+	}
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req := httptest.NewRequest(http.MethodPost, "/api/register", strings.NewReader(string(bodyBytes)))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
@@ -46,6 +65,23 @@ func TestRegister(t *testing.T) {
 	if assert.NoError(t, register(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		assert.Equal(t, `{"result":true,"content":""}`, strings.TrimSpace(rec.Body.String()))
+	}
+
+	// test invalid public key
+	body.AID = uuid.New().String()
+	body.PublicKey = "invalid public key"
+	bodyBytes, err = json.Marshal(body)
+	if err != nil {
+		t.Fatal(err)
+	}
+	req = httptest.NewRequest(http.MethodPost, "/api/register", strings.NewReader(string(bodyBytes)))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec = httptest.NewRecorder()
+	c = e.NewContext(req, rec)
+
+	if assert.NoError(t, register(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+		assert.Equal(t, `{"result":false,"content":"invalid public key"}`, strings.TrimSpace(rec.Body.String()))
 	}
 }
 

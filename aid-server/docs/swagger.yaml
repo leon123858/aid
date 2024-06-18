@@ -147,7 +147,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: empty string
+          description: aid string
           schema:
             $ref: '#/definitions/server.Response'
       summary: Register

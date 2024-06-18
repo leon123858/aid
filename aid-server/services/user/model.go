@@ -12,20 +12,27 @@ type Data struct {
 }
 
 type User struct {
-	ID uuid.UUID
-	DB ldb.DB
+	ID        uuid.UUID
+	DB        ldb.DB
+	IsExisted bool
 	Data
 }
 
 type Space struct {
 	DeviceFingerPrint DeviceFingerPrint
+	Info              Info
 }
 
 type Time struct {
-	preLoginTime time.Time
+	PreLoginTime time.Time
 }
 
 type DeviceFingerPrint struct {
 	IP   string
 	Brow string
+}
+
+type Info struct {
+	PublicKey string
+	AID       string
 }
