@@ -10,7 +10,10 @@ import (
 
 func TestSetGracefulShutdown(t *testing.T) {
 	// 創建一個模擬的 http.Server
-	server := &http.Server{}
+	server := &http.Server{
+		// do not listen 0.0.0.0 to avoid security issue
+		Addr: "127.0.0.1:8080",
+	}
 
 	// 調用 setGracefulShutdown 函數
 	setGracefulShutdown(server)
