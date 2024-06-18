@@ -16,8 +16,9 @@ run:
 
 test:
 	go clean -testcache
-	#go test -v ./... -cover
+	# go test -v ./... -cover
 	go test ./... -cover
+
 fmt:
 	go mod tidy
 	go fmt ./...
