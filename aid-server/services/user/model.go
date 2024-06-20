@@ -7,6 +7,11 @@ import (
 )
 
 type Data struct {
+	Records []Record
+	Info
+}
+
+type Record struct {
 	Space
 	Time
 }
@@ -20,11 +25,11 @@ type User struct {
 
 type Space struct {
 	DeviceFingerPrint DeviceFingerPrint
-	Info              Info
 }
 
 type Time struct {
 	PreLoginTime timestamp.Timestamp
+	CurEventTime timestamp.Timestamp
 }
 
 type DeviceFingerPrint struct {

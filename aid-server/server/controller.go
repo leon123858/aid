@@ -3,6 +3,7 @@ package server
 import (
 	"aid-server/configs"
 	"aid-server/pkg/jwt"
+	"aid-server/pkg/res"
 	"aid-server/pkg/rsa"
 	"aid-server/pkg/timestamp"
 	"aid-server/services/user"
@@ -23,7 +24,7 @@ func init() {
 // @Accept			json
 // @Produce		json
 // @Param			req	body		LoginRequest	true	"Login Request"
-// @Success		200	{object}	Response		"JWT Token"
+// @Success		200	{object}	res.Response	"JWT Token"
 // @Router			/api/login [post]
 func login(c echo.Context) error {
 	req := LoginRequest{}
@@ -32,24 +33,26 @@ func login(c echo.Context) error {
 	}
 	aidUUID, err := uuid.Parse(req.AID)
 	if err != nil {
-		return c.JSON(400, generateResponse(false, "invalid AID"))
+		return c.JSON(400, res.GenerateResponse(false, "invalid AID"))
 	}
 	userItem, err := user.CreateUser(aidUUID, UserDB)
 	if err != nil {
-		return c.JSON(500, generateResponse(false, "user item creation failed"))
+		return c.JSON(500, res.GenerateResponse(false, "user item creation failed"))
 	}
 	if !userItem.IsExist() {
-		return c.JSON(400, generateResponse(false, "user not existed"))
+		return c.JSON(400, res.GenerateResponse(false, "user not existed"))
 	}
-	if result, err := rsa.VerifySignature([]byte(userItem.GetSpace().Info.PublicKey), []byte(req.Timestamp), req.Sign); err != nil || !result {
-		return c.JSON(400, generateResponse(false, "invalid signature"))
+	if result, err := rsa.VerifySignature([]byte(userItem.GetInfo().PublicKey), []byte(req.Timestamp), req.Sign); err != nil || !result {
+		return c.JSON(400, res.GenerateResponse(false, "invalid signature"))
 	}
 	if !timestamp.CheckTimestampClose5000(timestamp.ToTimestamp(req.Timestamp), timestamp.GetTime()) {
-		return c.JSON(400, generateResponse(false, "expired timestamp"))
+		return c.JSON(400, res.GenerateResponse(false, "expired timestamp"))
 	}
-	err = userItem.SetAll(user.Data{
+	curTime := timestamp.GetTime()
+	err = userItem.SetRecord(user.Record{
 		Time: user.Time{
-			PreLoginTime: timestamp.GetTime(),
+			PreLoginTime: curTime,
+			CurEventTime: curTime,
 		},
 		Space: user.Space{
 			DeviceFingerPrint: user.DeviceFingerPrint{
@@ -59,29 +62,13 @@ func login(c echo.Context) error {
 		},
 	})
 	if err != nil {
-		return c.JSON(500, generateResponse(false, "user item update failed"))
+		return c.JSON(500, res.GenerateResponse(false, "user item update failed"))
 	}
 	token, err := jwt.GenerateToken(aidUUID.String())
 	if err != nil {
-		return c.JSON(500, generateResponse(false, "token generation failed"))
+		return c.JSON(500, res.GenerateResponse(false, "token generation failed"))
 	}
-	return c.JSON(200, generateResponse(true, token))
-}
-
-// @Summary		Logout
-// @Description	Logout
-// @Tags			Auth
-// @Accept			json
-// @Produce		json
-// @Param			req	body		LogoutRequest	true	"Logout Request"
-// @Success		200	{object}	Response		"empty string"
-// @Router			/api/logout [post]
-func logout(c echo.Context) error {
-	req := LogoutRequest{}
-	if err := c.Bind(&req); err != nil {
-		return err
-	}
-	return c.JSON(200, generateResponse(true, ""))
+	return c.JSON(200, res.GenerateResponse(true, token))
 }
 
 // @Summary		Register
@@ -90,50 +77,55 @@ func logout(c echo.Context) error {
 // @Accept			json
 // @Produce		json
 // @Param			req	body		RegisterRequest	true	"Register Request"
-// @Success		200	{object}	Response		"JWT Token"
+// @Success		200	{object}	res.Response	"JWT Token"
 // @Router			/api/register [post]
 func register(c echo.Context) error {
 	req := RegisterRequest{}
 	if err := c.Bind(&req); err != nil {
-		return c.JSON(400, generateResponse(false, "invalid request body"))
+		return c.JSON(400, res.GenerateResponse(false, "invalid request body"))
 	}
 	if !rsa.IsValidPublicKey([]byte(req.PublicKey)) {
-		return c.JSON(400, generateResponse(false, "invalid public key"))
+		return c.JSON(400, res.GenerateResponse(false, "invalid public key"))
 	}
 	aidUUID, err := uuid.Parse(req.AID)
 	if err != nil {
-		return c.JSON(400, generateResponse(false, "invalid AID"))
+		return c.JSON(400, res.GenerateResponse(false, "invalid AID"))
 	}
 	userItem, err := user.CreateUser(aidUUID, UserDB)
 	if err != nil {
-		return c.JSON(500, generateResponse(false, "user item creation failed"))
+		return c.JSON(500, res.GenerateResponse(false, "user item creation failed"))
 	}
 	if userItem.IsExist() {
-		return c.JSON(400, generateResponse(false, "user already existed"))
+		return c.JSON(400, res.GenerateResponse(false, "user already existed"))
 	}
-	err = userItem.SetAll(user.Data{
+	curTime := timestamp.GetTime()
+	err = userItem.SetRecord(user.Record{
 		Space: user.Space{
 			DeviceFingerPrint: user.DeviceFingerPrint{
 				IP:   req.IP,
 				Brow: req.Browser,
 			},
-			Info: user.Info{
-				PublicKey: req.PublicKey,
-				AID:       req.AID,
-			},
 		},
 		Time: user.Time{
-			PreLoginTime: timestamp.GetTime(),
+			PreLoginTime: curTime,
+			CurEventTime: curTime,
 		},
 	})
 	if err != nil {
-		return c.JSON(500, generateResponse(false, "user item update failed"))
+		return c.JSON(500, res.GenerateResponse(false, "user record update failed"))
+	}
+	err = userItem.SetInfo(user.Info{
+		PublicKey: req.PublicKey,
+		AID:       aidUUID.String(),
+	})
+	if err != nil {
+		return c.JSON(500, res.GenerateResponse(false, "user info update failed"))
 	}
 	token, err := jwt.GenerateToken(aidUUID.String())
 	if err != nil {
-		return c.JSON(500, generateResponse(false, "token generation failed"))
+		return c.JSON(500, res.GenerateResponse(false, "token generation failed"))
 	}
-	return c.JSON(200, generateResponse(true, token))
+	return c.JSON(200, res.GenerateResponse(true, token))
 }
 
 // @Summary		Ask
@@ -141,15 +133,15 @@ func register(c echo.Context) error {
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
-// @Param			req	body		AskRequest	true	"Ask Request"
-// @Success		200	{object}	Response	"aid string"
+// @Param			req	body		AskRequest		true	"Ask Request"
+// @Success		200	{object}	res.Response	"aid string"
 // @Router			/api/ask [post]
 func ask(c echo.Context) error {
 	req := AskRequest{}
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
-	return c.JSON(200, generateResponse(true, ""))
+	return c.JSON(200, res.GenerateResponse(true, ""))
 }
 
 // @Summary		Trigger
@@ -158,12 +150,12 @@ func ask(c echo.Context) error {
 // @Accept			json
 // @Produce		json
 // @Param			req	body		TriggerRequest	true	"Trigger Request"
-// @Success		200	{object}	Response		"aid string"
+// @Success		200	{object}	res.Response	"aid string"
 // @Router			/api/trigger [post]
 func trigger(c echo.Context) error {
 	req := TriggerRequest{}
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
-	return c.JSON(200, generateResponse(true, ""))
+	return c.JSON(200, res.GenerateResponse(true, ""))
 }

@@ -2,6 +2,7 @@ package server
 
 import (
 	"aid-server/pkg/jwt"
+	"aid-server/pkg/res"
 	"aid-server/pkg/rsa"
 	"aid-server/pkg/timestamp"
 	"encoding/json"
@@ -67,29 +68,16 @@ func TestLogin(t *testing.T) {
 
 	if assert.NoError(t, login(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		println(rec.Body.String())
-		var res Response
-		err := json.Unmarshal(rec.Body.Bytes(), &res)
+		//println(rec.Body.String())
+		var result res.Response
+		err := json.Unmarshal(rec.Body.Bytes(), &result)
 		if assert.NoError(t, err) {
-			assert.True(t, res.Result)
-			assert.NotEmpty(t, res.Content)
-			claims, err := jwt.ParseToken(res.Content)
+			assert.True(t, result.Result)
+			assert.NotEmpty(t, result.Content)
+			claims, err := jwt.ParseToken(result.Content)
 			assert.NoError(t, err)
 			assert.Equal(t, aidUUID.String(), claims.ID)
 		}
-	}
-}
-
-func TestLogout(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/api/logout", strings.NewReader(`{"aid":"testAID","ip":"127.0.0.1","browser":"Chrome"}`))
-	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
-	if assert.NoError(t, logout(c)) {
-		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, `{"result":true,"content":""}`, strings.TrimSpace(rec.Body.String()))
 	}
 }
 

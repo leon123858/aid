@@ -57,70 +57,16 @@ func TestCreateUser(t *testing.T) {
 	assert.NoError(t, err)
 	assert.NotNil(t, u)
 	assert.Equal(t, aid, u.GetAID())
-	assert.Equal(t, &Space{}, u.GetSpace())
-	assert.Equal(t, &Time{}, u.GetTime())
-	db.AssertExpectations(t)
-}
-
-func TestUser_SetSpace(t *testing.T) {
-	db := new(MockDB)
-	aid := uuid.New()
-	u := &User{
-		ID: aid,
-		DB: db,
-		Data: Data{
-			Space: Space{},
-			Time:  Time{},
+	assert.Equal(t, Space{
+		DeviceFingerPrint: DeviceFingerPrint{
+			IP:   "",
+			Brow: "",
 		},
-	}
-	newSpace := Space{
-		DeviceFingerPrint: defaultDeviceFingerPrint,
-	}
-	db.On("Set", aid.String(), mock.AnythingOfType("string")).Return(nil)
-	err := u.SetSpace(newSpace)
-	assert.NoError(t, err)
-	assert.Equal(t, &newSpace, u.GetSpace())
-	db.AssertExpectations(t)
-}
-
-func TestUser_SetSpace_Error(t *testing.T) {
-	db := new(MockDB)
-	aid := uuid.New()
-	u := &User{
-		ID: aid,
-		DB: db,
-		Data: Data{
-			Space: Space{},
-			Time:  Time{},
-		},
-	}
-	newSpace := Space{
-		DeviceFingerPrint: defaultDeviceFingerPrint,
-	}
-	db.On("Set", aid.String(), mock.AnythingOfType("string")).Return(assert.AnError)
-	err := u.SetSpace(newSpace)
-	assert.Error(t, err)
-	db.AssertExpectations(t)
-}
-
-func TestUser_SetTime(t *testing.T) {
-	db := new(MockDB)
-	aid := uuid.New()
-	u := &User{
-		ID: aid,
-		DB: db,
-		Data: Data{
-			Space: Space{},
-			Time:  Time{},
-		},
-	}
-	newTime := Time{
-		PreLoginTime: timestamp.GetTime(),
-	}
-	db.On("Set", aid.String(), mock.AnythingOfType("string")).Return(nil)
-	err := u.SetTime(newTime)
-	assert.NoError(t, err)
-	assert.Equal(t, &newTime, u.GetTime())
+	}, *u.GetSpace())
+	assert.Equal(t, Time{
+		PreLoginTime: 0,
+		CurEventTime: 0,
+	}, *u.GetTime())
 	db.AssertExpectations(t)
 }
 
@@ -131,22 +77,26 @@ func TestUser_SetAll(t *testing.T) {
 		ID: aid,
 		DB: db,
 		Data: Data{
-			Space: Space{},
-			Time:  Time{},
+			Records: make([]Record, 0),
+			Info: Info{
+				PublicKey: "",
+				AID:       aid.String(),
+			},
 		},
 	}
-	newData := Data{
+	newData := Record{
 		Space: Space{
 			DeviceFingerPrint: defaultDeviceFingerPrint,
 		},
 		Time: Time{
 			PreLoginTime: timestamp.GetTime(),
+			CurEventTime: timestamp.GetTime(),
 		},
 	}
 	db.On("Set", aid.String(), mock.AnythingOfType("string")).Return(nil)
-	err := u.SetAll(newData)
+	err := u.SetRecord(newData)
 	assert.NoError(t, err)
-	assert.Equal(t, &newData, &u.Data)
+	assert.Equal(t, &newData, &u.Data.Records[0])
 	assert.Equal(t, &newData.Space, u.GetSpace())
 	assert.Equal(t, &newData.Time, u.GetTime())
 	db.AssertExpectations(t)

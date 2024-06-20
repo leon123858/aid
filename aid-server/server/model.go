@@ -9,11 +9,6 @@ type Request struct {
 	Space
 }
 
-type Response struct {
-	Result  bool   `json:"result"`
-	Content string `json:"content"`
-}
-
 type LoginRequest struct {
 	AID       string `json:"aid"`
 	Sign      string `json:"sign"`
@@ -38,11 +33,4 @@ type AskRequest struct {
 
 type TriggerRequest struct {
 	Request
-}
-
-func generateResponse(result bool, content string) Response {
-	return Response{
-		Result:  result,
-		Content: content,
-	}
 }

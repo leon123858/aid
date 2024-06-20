@@ -2,10 +2,12 @@ package jwt
 
 import (
 	"aid-server/configs"
+	"aid-server/pkg/res"
 	"errors"
 	"github.com/golang-jwt/jwt/v4"
 	jwtlib "github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 	"time"
 )
 
@@ -54,4 +56,26 @@ func ParseToken(tokenString string) (*UserClaims, error) {
 		return nil, errors.New("invalid token claims")
 	}
 	return claims, nil
+}
+
+// GenerateParseJwtMiddle is a middleware function to parse jwt token
+// and set claims to context by key "claims"
+func GenerateParseJwtMiddle(resFunc func(bool, string) res.Response) echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(c echo.Context) error {
+			tokenString := c.Request().Header.Get("Authorization")
+			if tokenString == "" {
+				return c.JSON(401, resFunc(false, "no token"))
+			}
+			claims, err := ParseToken(tokenString)
+			if err != nil {
+				return c.JSON(401, resFunc(false, "invalid token"))
+			}
+			if err := claims.Valid(); err != nil {
+				return c.JSON(401, resFunc(false, err.Error()))
+			}
+			c.Set("claims", claims)
+			return next(c)
+		}
+	}
 }

@@ -2,8 +2,12 @@ package jwt
 
 import (
 	"aid-server/configs"
+	"aid-server/pkg/res"
 	"github.com/google/uuid"
+	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
+	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 )
@@ -55,4 +59,56 @@ func TestJwt_inValid(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.Nil(t, claims)
 	assert.Equal(t, "signature is invalid", err.Error())
+}
+
+func TestGenerateParseJwtMiddle(t *testing.T) {
+	// 创建一个响应函数，返回自定义的响应格式
+	resFunc := func(success bool, message string) res.Response {
+		return res.Response{
+			Result:  success,
+			Content: message,
+		}
+	}
+
+	// 创建一个 Echo 实例
+	e := echo.New()
+
+	// 注册中间件
+	e.Use(GenerateParseJwtMiddle(resFunc))
+
+	// 创建一个处理函数，用于测试中间件
+	handler := func(c echo.Context) error {
+		return c.String(http.StatusOK, "Hello, World!")
+	}
+
+	// 测试没有提供 token 的情况
+	req := httptest.NewRequest(http.MethodGet, "/", nil)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	err := GenerateParseJwtMiddle(resFunc)(handler)(c)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+
+	// 测试提供无效 token 的情况
+	req = httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Authorization", "invalid_token")
+	rec = httptest.NewRecorder()
+	c = e.NewContext(req, rec)
+	err = GenerateParseJwtMiddle(resFunc)(handler)(c)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusUnauthorized, rec.Code)
+
+	// 测试提供有效 token 的情况
+	var validToken string
+	if validToken, err = GenerateToken(uuid.New().String()); err != nil {
+		t.Fatal(err)
+	}
+	req = httptest.NewRequest(http.MethodGet, "/", nil)
+	req.Header.Set("Authorization", validToken)
+	rec = httptest.NewRecorder()
+	c = e.NewContext(req, rec)
+	err = GenerateParseJwtMiddle(resFunc)(handler)(c)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, rec.Code)
+	assert.Equal(t, "Hello, World!", rec.Body.String())
 }

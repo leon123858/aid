@@ -15,6 +15,8 @@ run:
 	go run ./main.go server
 
 test:
+	make swag
+	make fmt
 	go clean -testcache
 	# go test -v ./... -cover
 	go test ./... -cover
