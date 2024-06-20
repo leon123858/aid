@@ -151,7 +151,7 @@ const docTemplate = `{
                 ],
                 "responses": {
                     "200": {
-                        "description": "aid string",
+                        "description": "JWT Token",
                         "schema": {
                             "$ref": "#/definitions/server.Response"
                         }
@@ -219,6 +219,9 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "sign": {
+                    "type": "string"
+                },
+                "timestamp": {
                     "type": "string"
                 }
             }

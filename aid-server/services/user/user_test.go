@@ -1,12 +1,12 @@
 package user
 
 import (
+	"aid-server/pkg/timestamp"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"os"
 	"testing"
-	"time"
 )
 
 type MockDB struct {
@@ -115,7 +115,7 @@ func TestUser_SetTime(t *testing.T) {
 		},
 	}
 	newTime := Time{
-		PreLoginTime: time.Now(),
+		PreLoginTime: timestamp.GetTime(),
 	}
 	db.On("Set", aid.String(), mock.AnythingOfType("string")).Return(nil)
 	err := u.SetTime(newTime)
@@ -140,7 +140,7 @@ func TestUser_SetAll(t *testing.T) {
 			DeviceFingerPrint: defaultDeviceFingerPrint,
 		},
 		Time: Time{
-			PreLoginTime: time.Now(),
+			PreLoginTime: timestamp.GetTime(),
 		},
 	}
 	db.On("Set", aid.String(), mock.AnythingOfType("string")).Return(nil)

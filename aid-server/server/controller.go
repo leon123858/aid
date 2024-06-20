@@ -2,11 +2,12 @@ package server
 
 import (
 	"aid-server/configs"
+	"aid-server/pkg/jwt"
 	"aid-server/pkg/rsa"
+	"aid-server/pkg/timestamp"
 	"aid-server/services/user"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
-	"time"
 )
 
 func init() {
@@ -29,7 +30,42 @@ func login(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
-	return c.JSON(200, generateResponse(true, ""))
+	aidUUID, err := uuid.Parse(req.AID)
+	if err != nil {
+		return c.JSON(400, generateResponse(false, "invalid AID"))
+	}
+	userItem, err := user.CreateUser(aidUUID, UserDB)
+	if err != nil {
+		return c.JSON(500, generateResponse(false, "user item creation failed"))
+	}
+	if !userItem.IsExist() {
+		return c.JSON(400, generateResponse(false, "user not existed"))
+	}
+	if result, err := rsa.VerifySignature([]byte(userItem.GetSpace().Info.PublicKey), []byte(req.Timestamp), req.Sign); err != nil || !result {
+		return c.JSON(400, generateResponse(false, "invalid signature"))
+	}
+	if !timestamp.CheckTimestampClose5000(timestamp.ToTimestamp(req.Timestamp), timestamp.GetTime()) {
+		return c.JSON(400, generateResponse(false, "expired timestamp"))
+	}
+	err = userItem.SetAll(user.Data{
+		Time: user.Time{
+			PreLoginTime: timestamp.GetTime(),
+		},
+		Space: user.Space{
+			DeviceFingerPrint: user.DeviceFingerPrint{
+				IP:   req.IP,
+				Brow: req.Browser,
+			},
+		},
+	})
+	if err != nil {
+		return c.JSON(500, generateResponse(false, "user item update failed"))
+	}
+	token, err := jwt.GenerateToken(aidUUID.String())
+	if err != nil {
+		return c.JSON(500, generateResponse(false, "token generation failed"))
+	}
+	return c.JSON(200, generateResponse(true, token))
 }
 
 // @Summary		Logout
@@ -54,7 +90,7 @@ func logout(c echo.Context) error {
 // @Accept			json
 // @Produce		json
 // @Param			req	body		RegisterRequest	true	"Register Request"
-// @Success		200	{object}	Response		"aid string"
+// @Success		200	{object}	Response		"JWT Token"
 // @Router			/api/register [post]
 func register(c echo.Context) error {
 	req := RegisterRequest{}
@@ -87,13 +123,17 @@ func register(c echo.Context) error {
 			},
 		},
 		Time: user.Time{
-			PreLoginTime: time.Now(),
+			PreLoginTime: timestamp.GetTime(),
 		},
 	})
 	if err != nil {
 		return c.JSON(500, generateResponse(false, "user item update failed"))
 	}
-	return c.JSON(200, generateResponse(true, ""))
+	token, err := jwt.GenerateToken(aidUUID.String())
+	if err != nil {
+		return c.JSON(500, generateResponse(false, "token generation failed"))
+	}
+	return c.JSON(200, generateResponse(true, token))
 }
 
 // @Summary		Ask

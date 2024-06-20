@@ -1,10 +1,12 @@
 package rsa
 
 import (
+	"aid-server/pkg/timestamp"
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/sha256"
+	"encoding/base64"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -28,28 +30,28 @@ func TestVerifySignature(t *testing.T) {
 	data := []byte("test data")
 	hash := sha256.Sum256(data)
 	signature, _ := rsa.SignPKCS1v15(rand.Reader, privateKey, crypto.SHA256, hash[:])
+	b64Data := base64.StdEncoding.EncodeToString(signature)
 
-	valid, err := VerifySignature(publicKeyPEM, data, signature)
+	valid, err := VerifySignature(publicKeyPEM, data, b64Data)
 	assert.NoError(t, err, "Unexpected error")
 	assert.True(t, valid, "Valid signature is considered invalid")
 
 	invalidSignature := []byte("invalid signature")
-	valid, err = VerifySignature(publicKeyPEM, data, invalidSignature)
+	b64Data = base64.StdEncoding.EncodeToString(invalidSignature)
+	valid, err = VerifySignature(publicKeyPEM, data, b64Data)
 	assert.Error(t, err, "Expected an error for invalid signature")
 	assert.False(t, valid, "Invalid signature is considered valid")
 }
 
-func TestEncryptDecrypt(t *testing.T) {
+func TestGenerateSignature(t *testing.T) {
 	privateKey, publicKey := GenerateRSAKeyPair()
-	publicKeyPEM := MarshalPublicKey(publicKey)
 	privateKeyPEM := MarshalPrivateKey(privateKey)
 
-	data := []byte("test data")
-	ciphertext, err := Encrypt(publicKeyPEM, data)
-	require.NoError(t, err, "Unexpected error during encryption")
+	data := []byte(timestamp.GetTime().String())
+	signature, err := GenerateSignature(privateKeyPEM, data)
+	require.NoError(t, err, "Unexpected error during signature generation")
 
-	plaintext, err := Decrypt(privateKeyPEM, ciphertext)
-	require.NoError(t, err, "Unexpected error during decryption")
-
-	assert.Equal(t, data, plaintext, "Decrypted data does not match the original data")
+	valid, err := VerifySignature(MarshalPublicKey(publicKey), data, signature)
+	assert.NoError(t, err, "Unexpected error during signature verification")
+	assert.True(t, valid, "Valid signature is considered invalid")
 }

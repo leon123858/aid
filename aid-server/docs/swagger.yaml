@@ -17,6 +17,8 @@ definitions:
         type: string
       sign:
         type: string
+      timestamp:
+        type: string
     type: object
   server.LogoutRequest:
     properties:
@@ -147,7 +149,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: aid string
+          description: JWT Token
           schema:
             $ref: '#/definitions/server.Response'
       summary: Register

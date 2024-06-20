@@ -15,8 +15,9 @@ type Response struct {
 }
 
 type LoginRequest struct {
-	AID  string `json:"aid"`
-	Sign string `json:"sign"`
+	AID       string `json:"aid"`
+	Sign      string `json:"sign"`
+	Timestamp string `json:"timestamp"`
 	Request
 }
 

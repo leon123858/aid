@@ -2,8 +2,8 @@ package user
 
 import (
 	"aid-server/pkg/ldb"
+	"aid-server/pkg/timestamp"
 	"github.com/google/uuid"
-	"time"
 )
 
 type Data struct {
@@ -24,7 +24,7 @@ type Space struct {
 }
 
 type Time struct {
-	PreLoginTime time.Time
+	PreLoginTime timestamp.Timestamp
 }
 
 type DeviceFingerPrint struct {
