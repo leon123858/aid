@@ -18,6 +18,19 @@ type ldb struct {
 	db *leveldb.DB
 }
 
+func NewDB(path string) (DB, error) {
+	db := New()
+	err := db.Connect(path)
+	if err != nil {
+		return nil, err
+	}
+	return db, nil
+}
+
+func FreeDB(db DB) error {
+	return db.Close()
+}
+
 func (l *ldb) Connect(path string) error {
 	db, err := leveldb.OpenFile(path+".ldb", nil)
 	if err != nil {

@@ -18,6 +18,7 @@ var Configs = struct {
 	}
 	Path struct {
 		UserDB string
+		IDMap  string
 	}
 }{}
 
@@ -27,6 +28,7 @@ func init() {
 	Configs.Jwt.Secret = "test"
 	Configs.Jwt.Duration = time.Hour
 	Configs.Path.UserDB = "data/user.db"
+	Configs.Path.IDMap = "data/idmap.db"
 	err := godotenv.Load()
 	if err != nil {
 		fmt.Println("Error loading .env file")
@@ -37,4 +39,5 @@ func init() {
 	Configs.Jwt.Secret = os.Getenv("JWT_SECRET")
 	Configs.Jwt.Duration, err = time.ParseDuration(os.Getenv("JWT_DURATION"))
 	Configs.Path.UserDB = os.Getenv("USER_DB")
+	Configs.Path.IDMap = os.Getenv("ID_MAP")
 }

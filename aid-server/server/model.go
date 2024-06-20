@@ -32,5 +32,6 @@ type AskRequest struct {
 }
 
 type TriggerRequest struct {
+	UID string `json:"uid"`
 	Request
 }

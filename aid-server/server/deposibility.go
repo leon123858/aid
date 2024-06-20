@@ -2,7 +2,6 @@ package server
 
 import (
 	"aid-server/pkg/ldb"
-	"aid-server/services/user"
 	"net/http"
 	"os"
 	"os/signal"
@@ -10,6 +9,7 @@ import (
 )
 
 var UserDB ldb.DB
+var UserMapDB ldb.DB
 
 func setGracefulShutdown(server *http.Server) {
 	signals := make(chan os.Signal, 1)
@@ -19,7 +19,10 @@ func setGracefulShutdown(server *http.Server) {
 		if err := server.Close(); err != nil {
 			panic(err)
 		}
-		if err := user.FreeDB(UserDB); err != nil {
+		if err := ldb.FreeDB(UserDB); err != nil {
+			return
+		}
+		if err := ldb.FreeDB(UserMapDB); err != nil {
 			return
 		}
 	}()

@@ -28,7 +28,6 @@ type Space struct {
 }
 
 type Time struct {
-	PreLoginTime timestamp.Timestamp
 	CurEventTime timestamp.Timestamp
 }
 

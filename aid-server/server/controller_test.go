@@ -16,11 +16,10 @@ import (
 	"testing"
 )
 
-func TestLogin(t *testing.T) {
-	e := echo.New()
+func addUser(e *echo.Echo, t *testing.T) (uuid.UUID, []byte) {
 	p, key := rsa.GenerateRSAKeyPair()
-	pubKey := rsa.MarshalPublicKey(key)
 	privKey := rsa.MarshalPrivateKey(p)
+	pubKey := rsa.MarshalPublicKey(key)
 	aidUUID := uuid.New()
 	body := RegisterRequest{
 		AID:       aidUUID.String(),
@@ -44,12 +43,18 @@ func TestLogin(t *testing.T) {
 	if assert.NoError(t, register(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 	}
+	return aidUUID, privKey
+}
+
+func TestLogin(t *testing.T) {
+	e := echo.New()
+	aid, key := addUser(e, t)
 
 	ts := timestamp.GetTime()
-	sign, err := rsa.GenerateSignature(privKey, []byte(ts.String()))
+	sign, err := rsa.GenerateSignature(key, []byte(ts.String()))
 	assert.Nil(t, err)
 	loginRequest := LoginRequest{
-		AID:       aidUUID.String(),
+		AID:       aid.String(),
 		Sign:      sign,
 		Timestamp: ts.String(),
 		Request: Request{
@@ -61,10 +66,10 @@ func TestLogin(t *testing.T) {
 	}
 
 	jsonData, _ := json.Marshal(loginRequest)
-	req = httptest.NewRequest(http.MethodPost, "/api/login", strings.NewReader(string(jsonData)))
+	req := httptest.NewRequest(http.MethodPost, "/api/login", strings.NewReader(string(jsonData)))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec = httptest.NewRecorder()
-	c = e.NewContext(req, rec)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
 
 	if assert.NoError(t, login(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
@@ -76,7 +81,7 @@ func TestLogin(t *testing.T) {
 			assert.NotEmpty(t, result.Content)
 			claims, err := jwt.ParseToken(result.Content)
 			assert.NoError(t, err)
-			assert.Equal(t, aidUUID.String(), claims.ID)
+			assert.Equal(t, aid.String(), claims.ID)
 		}
 	}
 }
@@ -132,28 +137,67 @@ func TestRegister(t *testing.T) {
 	}
 }
 
-func TestAsk(t *testing.T) {
+func TestAskAndTrigger(t *testing.T) {
+	// Setup
 	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/api/ask", strings.NewReader(`{"ip":"127.0.0.1","browser":"Chrome"}`))
+	aid, _ := addUser(e, t)
+
+	req := httptest.NewRequest(http.MethodPost, "/api/ask", strings.NewReader(`{
+        "ip": "127.0.0.1",
+        "browser": "Chrome"
+    }`))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	if assert.NoError(t, ask(c)) {
+	token, _ := jwt.GenerateToken(aid.String())
+	c.Request().Header.Set(echo.HeaderAuthorization, token)
+	err := jwt.GenerateParseJwtMiddle(res.GenerateResponse)(ask)(c)
+	// Assertions
+	var uid string
+	if assert.NoError(t, err) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, `{"result":true,"content":""}`, strings.TrimSpace(rec.Body.String()))
+		var resp res.Response
+		assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+		assert.True(t, resp.Result)
+		assert.NotEmpty(t, resp.Content)
+		uid = resp.Content
 	}
-}
 
-func TestTrigger(t *testing.T) {
-	e := echo.New()
-	req := httptest.NewRequest(http.MethodPost, "/api/trigger", strings.NewReader(`{"ip":"127.0.0.1","browser":"Chrome"}`))
+	req = httptest.NewRequest(http.MethodPost, "/api/trigger", strings.NewReader(`{
+        "uid": "`+uid+`",
+        "ip": "127.0.0.1",
+        "browser": "Chrome"
+    }`))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-	rec := httptest.NewRecorder()
-	c := e.NewContext(req, rec)
-
+	rec = httptest.NewRecorder()
+	c = e.NewContext(req, rec)
+	// Assertions
 	if assert.NoError(t, trigger(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		assert.Equal(t, `{"result":true,"content":""}`, strings.TrimSpace(rec.Body.String()))
+		var resp res.Response
+		assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+		assert.True(t, resp.Result)
+		assert.NotEmpty(t, resp.Content)
+		assert.Equal(t, string(Online), resp.Content)
+	}
+
+	// test invalid
+	req = httptest.NewRequest(http.MethodPost, "/api/trigger", strings.NewReader(`{
+        "uid": "`+uid+`",
+        "ip": "127.0.0.1",
+        "browser": "Safari"
+    }`))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec = httptest.NewRecorder()
+	c = e.NewContext(req, rec)
+	// Assertions
+	if assert.NoError(t, trigger(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+		var resp res.Response
+		assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
+		assert.True(t, resp.Result)
+		assert.NotEmpty(t, resp.Content)
+		assert.Equal(t, string(Offline), resp.Content)
 	}
 }

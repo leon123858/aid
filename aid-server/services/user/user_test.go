@@ -1,6 +1,7 @@
 package user
 
 import (
+	"aid-server/pkg/ldb"
 	"aid-server/pkg/timestamp"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
@@ -64,7 +65,6 @@ func TestCreateUser(t *testing.T) {
 		},
 	}, *u.GetSpace())
 	assert.Equal(t, Time{
-		PreLoginTime: 0,
 		CurEventTime: 0,
 	}, *u.GetTime())
 	db.AssertExpectations(t)
@@ -89,7 +89,6 @@ func TestUser_SetAll(t *testing.T) {
 			DeviceFingerPrint: defaultDeviceFingerPrint,
 		},
 		Time: Time{
-			PreLoginTime: timestamp.GetTime(),
 			CurEventTime: timestamp.GetTime(),
 		},
 	}
@@ -103,9 +102,9 @@ func TestUser_SetAll(t *testing.T) {
 }
 
 func TestNewDB(t *testing.T) {
-	db, err := NewDB("test")
+	db, err := ldb.NewDB("test")
 	assert.NoError(t, err)
-	err = FreeDB(db)
+	err = ldb.FreeDB(db)
 	assert.NoError(t, err)
 	err = os.RemoveAll("test.ldb")
 	assert.Nil(t, err)

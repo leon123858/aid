@@ -18,19 +18,6 @@ type IUser interface {
 	SetInfo(Info) error
 }
 
-func NewDB(path string) (ldb.DB, error) {
-	db := ldb.New()
-	err := db.Connect(path)
-	if err != nil {
-		return nil, err
-	}
-	return db, nil
-}
-
-func FreeDB(db ldb.DB) error {
-	return db.Close()
-}
-
 func CreateUser(aid uuid.UUID, db ldb.DB) (IUser, error) {
 	if db == nil || aid == uuid.Nil {
 		panic("invalid parameter")
@@ -113,7 +100,6 @@ func (u *User) GetTime() *Time {
 	records := data.Records
 	if len(records) == 0 {
 		return &Time{
-			PreLoginTime: 0,
 			CurEventTime: 0,
 		}
 	}
