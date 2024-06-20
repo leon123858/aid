@@ -8,6 +8,7 @@ import (
 	"aid-server/pkg/rsa"
 	"aid-server/pkg/timestamp"
 	"aid-server/services/idmap"
+	"aid-server/services/tsa"
 	"aid-server/services/user"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
@@ -200,10 +201,17 @@ func trigger(c echo.Context) error {
 		return c.JSON(400, res.GenerateResponse(false, "user not existed"))
 	}
 	// check user status
-	if !timestamp.CheckTimestampClose5000(userItem.GetTime().CurEventTime, timestamp.GetTime()) {
-		return c.JSON(200, res.GenerateResponse(true, string(Offline)))
-	}
-	if userItem.GetSpace().DeviceFingerPrint.IP != req.IP || userItem.GetSpace().DeviceFingerPrint.Brow != req.Browser {
+	if !tsa.SimpleAlgo.Verify(userItem, &user.Record{
+		Space: user.Space{
+			DeviceFingerPrint: user.DeviceFingerPrint{
+				IP:   req.IP,
+				Brow: req.Browser,
+			},
+		},
+		Time: user.Time{
+			CurEventTime: timestamp.GetTime(),
+		},
+	}) {
 		return c.JSON(200, res.GenerateResponse(true, string(Offline)))
 	}
 	return c.JSON(200, res.GenerateResponse(true, string(Online)))
