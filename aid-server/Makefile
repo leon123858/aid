@@ -29,3 +29,5 @@ build:
 
 clean:
 	rm -rf ./bin
+	rm -rf ./data
+	rm -rf ./docs
