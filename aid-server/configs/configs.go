@@ -23,7 +23,7 @@ var Configs = struct {
 }{}
 
 func init() {
-	Configs.Host.Host = "localhost"
+	Configs.Host.Host = "0.0.0.0"
 	Configs.Host.Port = "8080"
 	Configs.Jwt.Secret = "test"
 	Configs.Jwt.Duration = time.Hour

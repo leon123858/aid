@@ -32,6 +32,15 @@ build:
 	go mod tidy
 	go build -o ./bin/aid ./main.go
 
+build-linux:
+	go mod tidy
+	CGO_ENABLED=0 GOOS=linux go build -o ./bin/aid ./main.go
+
+docker-build:
+	docker buildx build -t aid -f ./Dockerfile --platform linux/amd64 .
+	docker tag aid leon1234858/aid-server:latest
+	docker push leon1234858/aid-server:latest
+
 clean:
 	rm -rf ./bin
 	rm -rf ./data
