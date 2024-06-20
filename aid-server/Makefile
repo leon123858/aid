@@ -21,6 +21,9 @@ test:
 	# go test -v ./... -cover
 	go test ./... -cover
 
+test-function:
+	cd tests && npm run test
+
 fmt:
 	go mod tidy
 	go fmt ./...

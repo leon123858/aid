@@ -32,3 +32,11 @@ jobs:
       - name: Build
         run: make build
         working-directory: ./aid-server
+
+      - name: Use Node.js function test
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18.x'
+
+      - run: make test-function
+        working-directory: ./aid-server

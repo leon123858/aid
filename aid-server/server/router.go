@@ -43,7 +43,7 @@ func generateRouter() *echo.Echo {
 		api.POST("/login", login)
 		api.POST("/register", register)
 		api.POST("/ask", ask, jwt.GenerateParseJwtMiddle(res.GenerateResponse))
-		api.POST("/trigger", trigger, jwt.GenerateParseJwtMiddle(res.GenerateResponse))
+		api.POST("/trigger", trigger)
 	}
 
 	return router
