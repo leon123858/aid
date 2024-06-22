@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import assert from 'assert';
 
 const serverUrl = 'http://127.0.0.1:8080';
+// const serverUrl = 'http://20.2.209.109';
 let serverProcess;
 let aid;
 let privateKey;
@@ -34,7 +35,7 @@ const addUser = async () => {
         body: JSON.stringify({
             aid: aid,
             publicKey: pubKey,
-            ip: '127.0.0.1',
+            ip: '127.0.1.3',
             browser: 'Chrome',
         }),
     });
@@ -99,7 +100,7 @@ async function testLogin() {
             aid: aid,
             sign: sign.toString('base64'),
             timestamp: timestamp,
-            ip: '127.0.0.1',
+            ip: '127.0.1.3',
             browser: 'Chrome',
         }),
     });
@@ -119,7 +120,7 @@ async function testAsk(token) {
             'Authorization': `${token}`
         },
         body: JSON.stringify({
-            ip: '127.0.0.1',
+            ip: '127.0.1.3',
             browser: 'Chrome',
         }),
     });
@@ -127,17 +128,17 @@ async function testAsk(token) {
     assert.strictEqual(response.status, 200);
     assert.strictEqual(data.result, true);
     assert.ok(data.content);
-    return data.content; // Return uid for Trigger tests
+    return data.content; // Return uid for Check and Verify tests
 }
 
-async function testTriggerOnline(uid) {
-    console.log('Testing Trigger - Online...');
-    const response = await fetch(`${serverUrl}/api/trigger`, {
+async function testCheckOnline(uid) {
+    console.log('Testing Check - Online...');
+    const response = await fetch(`${serverUrl}/api/check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             uid: uid,
-            ip: '127.0.0.1',
+            ip: '127.0.1.3',
             browser: 'Chrome',
         }),
     });
@@ -147,21 +148,61 @@ async function testTriggerOnline(uid) {
     assert.strictEqual(data.content, 'online');
 }
 
-async function testTriggerOffline(uid) {
-    console.log('Testing Trigger - Offline...');
-    const response = await fetch(`${serverUrl}/api/trigger`, {
+async function testCheckOffline(uid) {
+    console.log('Testing Check - Offline...');
+    const response = await fetch(`${serverUrl}/api/check`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             uid: uid,
-            ip: '127.0.0.1',
-            browser: 'Safari',
+            ip: '127.0.1.3',
+            browser: 'Safari', // Different browser should result in offline status
         }),
     });
     const data = await response.json();
     assert.strictEqual(response.status, 200);
     assert.strictEqual(data.result, true);
     assert.strictEqual(data.content, 'offline');
+}
+
+async function testVerifySuccess(token, uid) {
+    console.log('Testing Verify - Success...');
+    const response = await fetch(`${serverUrl}/api/verify`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': token
+        },
+        body: JSON.stringify({
+            uid: uid,
+            ip: '127.0.0.1', // Different IP is allowed for verify
+            browser: 'Chrome',
+        }),
+    });
+    const data = await response.json();
+    assert.strictEqual(response.status, 200);
+    assert.strictEqual(data.result, true);
+    assert.ok(data.content);
+}
+
+async function testVerifyInvalidToken(uid) {
+    console.log('Testing Verify - Invalid Token...');
+    const response = await fetch(`${serverUrl}/api/verify`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'invalid_token'
+        },
+        body: JSON.stringify({
+            uid: uid,
+            ip: '127.0.0.1',
+            browser: 'Chrome',
+        }),
+    });
+    const data = await response.json();
+    assert.strictEqual(response.status, 401);
+    assert.strictEqual(data.result, false);
+    assert.strictEqual(data.content, 'invalid token');
 }
 
 async function runTests() {
@@ -171,8 +212,10 @@ async function runTests() {
         await testRegisterWithInvalidPublicKey();
         const token = await testLogin();
         const uid = await testAsk(token);
-        await testTriggerOnline(uid);
-        await testTriggerOffline(uid);
+        await testCheckOnline(uid);
+        await testCheckOffline(uid);
+        await testVerifySuccess(token, uid);
+        await testVerifyInvalidToken(uid);
         console.log('All tests passed successfully!');
     } catch (error) {
         console.error('Test failed:', error);

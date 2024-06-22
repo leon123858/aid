@@ -18,7 +18,7 @@ func Serve(ln net.Listener) error {
 
 	// print server info
 	fmt.Printf("Server is running on %s://%s\n", "http", ln.Addr().String())
-	fmt.Printf("Swagger docs: %s://%s/swagger/index.html\n", "http", ln.Addr().String())
+	fmt.Printf("Swagger docs: %s://127.0.0.1:8080/swagger/index.html\n", "http")
 
 	// Start the server
 	err := server.Serve(ln)

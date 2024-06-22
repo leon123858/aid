@@ -31,7 +31,12 @@ type AskRequest struct {
 	Request
 }
 
-type TriggerRequest struct {
+type CheckRequest struct {
+	UID string `json:"uid"`
+	Request
+}
+
+type VerifyRequest struct {
 	UID string `json:"uid"`
 	Request
 }

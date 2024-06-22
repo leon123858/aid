@@ -22,6 +22,7 @@ test:
 	go test ./... -cover
 
 test-function:
+	make build
 	cd tests && npm run test
 
 fmt:
@@ -40,6 +41,12 @@ docker-build:
 	docker buildx build -t aid -f ./Dockerfile --platform linux/amd64 .
 	docker tag aid leon1234858/aid-server:latest
 	docker push leon1234858/aid-server:latest
+
+deploy:
+	docker rm aid-server
+	docker rmi leon1234858/aid-server:latest
+	docker pull leon1234858/aid-server:latest
+	docker run -d --name aid-server -p 8080:8080 leon1234858/aid-server:latest
 
 clean:
 	rm -rf ./bin

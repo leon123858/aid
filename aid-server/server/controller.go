@@ -183,16 +183,16 @@ func ask(c echo.Context) error {
 	return c.JSON(200, res.GenerateResponse(true, uid))
 }
 
-// @Summary		Trigger
-// @Description	given uid, trigger the service to check user status, maybe ask user should login again in aid server
+// @Summary		Check
+// @Description	given uid, check the service to check user status, maybe ask user should login again in aid server
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
-// @Param			req	body		TriggerRequest	true	"Trigger Request"
+// @Param			req	body		CheckRequest	true	"Check Request"
 // @Success		200	{object}	res.Response	"safe status"
-// @Router			/api/trigger [post]
-func trigger(c echo.Context) error {
-	req := TriggerRequest{}
+// @Router			/api/check [post]
+func check(c echo.Context) error {
+	req := CheckRequest{}
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
@@ -226,4 +226,32 @@ func trigger(c echo.Context) error {
 		return c.JSON(200, res.GenerateResponse(true, string(Offline)))
 	}
 	return c.JSON(200, res.GenerateResponse(true, string(Online)))
+}
+
+// @Summary		Verify
+// @Description	given uid and JWT token, verify is the JWT token is valid
+// @Tags			Auth
+// @Accept			json
+// @Produce		json
+// @Security		Bearer
+// @Param			req	body		VerifyRequest	true	"Verify Request"
+// @Success		200	{object}	res.Response	"result"
+// @Router			/api/verify [post]
+func verify(c echo.Context) error {
+	req := VerifyRequest{}
+	if err := c.Bind(&req); err != nil {
+		return err
+	}
+	claims, ok := c.Get("claims").(*jwt.UserClaims)
+	if !ok {
+		return c.JSON(400, res.GenerateResponse(false, "invalid claims"))
+	}
+	aid, err := IDMapPoint.Get(req.UID)
+	if err != nil || aid == "" {
+		return c.JSON(400, res.GenerateResponse(false, "invalid uid"))
+	}
+	if aid != claims.ID {
+		return c.JSON(400, res.GenerateResponse(false, "token not match uid"))
+	}
+	return c.JSON(200, res.GenerateResponse(true, "token match uid"))
 }
