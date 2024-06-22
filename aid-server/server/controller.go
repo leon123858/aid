@@ -8,13 +8,15 @@ import (
 	"aid-server/pkg/rsa"
 	"aid-server/pkg/timestamp"
 	"aid-server/services/idmap"
-	"aid-server/services/tsa"
+	"aid-server/services/mlm"
+	"aid-server/services/rba"
 	"aid-server/services/user"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
 var IDMapPoint *idmap.IDMap
+var RecordCache mlm.MultiLevelMap
 
 func init() {
 	var err error
@@ -25,6 +27,7 @@ func init() {
 		panic(err)
 	}
 	IDMapPoint = idmap.NewIDMap(100, UserMapDB)
+	RecordCache = mlm.NewMultiLevelMap()
 }
 
 // @Summary		Login
@@ -71,6 +74,13 @@ func login(c echo.Context) error {
 	})
 	if err != nil {
 		return c.JSON(500, res.GenerateResponse(false, "user item update failed"))
+	}
+	err = RecordCache.Set(mlm.KeyItem{
+		IP:      req.IP,
+		Browser: req.Browser,
+	}, aidUUID)
+	if err != nil {
+		return err
 	}
 	token, err := jwt.GenerateToken(aidUUID.String())
 	if err != nil {
@@ -140,24 +150,25 @@ func register(c echo.Context) error {
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
-// @Security		Bearer
 // @Param			req	body		AskRequest		true	"Ask Request"
 // @Success		200	{object}	res.Response	"uuid that can map aid, so that aid can map many uuids"
 // @Router			/api/ask [post]
 func ask(c echo.Context) error {
 	req := AskRequest{}
 	if err := c.Bind(&req); err != nil {
-		return err
+		return c.JSON(400, res.GenerateResponse(false, "invalid request body"))
 	}
-	claims, ok := c.Get("claims").(*jwt.UserClaims)
-	if !ok {
-		return c.JSON(400, res.GenerateResponse(false, "invalid claims"))
-	}
-	aid := claims.ID
-	aidUUID, err := uuid.Parse(aid)
+	get, err := RecordCache.Get(mlm.KeyItem{
+		IP:      req.IP,
+		Browser: req.Browser,
+	})
 	if err != nil {
-		return c.JSON(400, res.GenerateResponse(false, "invalid AID"))
+		return c.JSON(400, res.GenerateResponse(false, err.Error()))
 	}
+	if len(get) != 1 {
+		return c.JSON(400, res.GenerateResponse(false, "can not get unique aid"))
+	}
+	aidUUID := get[0]
 	userItem, err := user.CreateUser(aidUUID, UserDB)
 	if err != nil {
 		return c.JSON(500, res.GenerateResponse(false, "user item creation failed"))
@@ -166,14 +177,14 @@ func ask(c echo.Context) error {
 		return c.JSON(400, res.GenerateResponse(false, "user not existed"))
 	}
 	uid := uuid.New().String()
-	if err := IDMapPoint.Set(uid, aid); err != nil {
+	if err := IDMapPoint.Set(uid, aidUUID.String()); err != nil {
 		return c.JSON(500, res.GenerateResponse(false, "id map set failed"))
 	}
 	return c.JSON(200, res.GenerateResponse(true, uid))
 }
 
 // @Summary		Trigger
-// @Description	service ask user to login again, this api can polling to check user status
+// @Description	given uid, trigger the service to check user status, maybe ask user should login again in aid server
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
@@ -201,7 +212,7 @@ func trigger(c echo.Context) error {
 		return c.JSON(400, res.GenerateResponse(false, "user not existed"))
 	}
 	// check user status
-	if !tsa.SimpleAlgo.Verify(userItem, &user.Record{
+	if !rba.SimpleAlgo.Verify(userItem, &user.Record{
 		Space: user.Space{
 			DeviceFingerPrint: user.DeviceFingerPrint{
 				IP:   req.IP,

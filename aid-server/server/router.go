@@ -2,8 +2,6 @@ package server
 
 import (
 	_ "aid-server/docs"
-	"aid-server/pkg/jwt"
-	"aid-server/pkg/res"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	echoSwagger "github.com/swaggo/echo-swagger"
@@ -42,7 +40,7 @@ func generateRouter() *echo.Echo {
 	{
 		api.POST("/login", login)
 		api.POST("/register", register)
-		api.POST("/ask", ask, jwt.GenerateParseJwtMiddle(res.GenerateResponse))
+		api.POST("/ask", ask)
 		api.POST("/trigger", trigger)
 	}
 

@@ -16,6 +16,7 @@ type IUser interface {
 	GetTime() *Time
 	SetRecord(Record) error
 	SetInfo(Info) error
+	//flag.Getter
 }
 
 func CreateUser(aid uuid.UUID, db ldb.DB) (IUser, error) {

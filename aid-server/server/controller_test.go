@@ -46,10 +46,8 @@ func addUser(e *echo.Echo, t *testing.T) (uuid.UUID, []byte) {
 	return aidUUID, privKey
 }
 
-func TestLogin(t *testing.T) {
-	e := echo.New()
+func userLogin(e *echo.Echo, reqBody Request, t *testing.T) (uuid.UUID, []byte) {
 	aid, key := addUser(e, t)
-
 	ts := timestamp.GetTime()
 	sign, err := rsa.GenerateSignature(key, []byte(ts.String()))
 	assert.Nil(t, err)
@@ -57,12 +55,7 @@ func TestLogin(t *testing.T) {
 		AID:       aid.String(),
 		Sign:      sign,
 		Timestamp: ts.String(),
-		Request: Request{
-			Space: Space{
-				IP:      "127.0.0.1",
-				Browser: "Chrome",
-			},
-		},
+		Request:   reqBody,
 	}
 
 	jsonData, _ := json.Marshal(loginRequest)
@@ -73,7 +66,6 @@ func TestLogin(t *testing.T) {
 
 	if assert.NoError(t, login(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
-		//println(rec.Body.String())
 		var result res.Response
 		err := json.Unmarshal(rec.Body.Bytes(), &result)
 		if assert.NoError(t, err) {
@@ -84,6 +76,19 @@ func TestLogin(t *testing.T) {
 			assert.Equal(t, aid.String(), claims.ID)
 		}
 	}
+	return aid, key
+}
+
+func TestLogin(t *testing.T) {
+	e := echo.New()
+	aid, key := userLogin(e, Request{
+		Space: Space{
+			IP:      "127.0.0.1",
+			Browser: "Chrome",
+		},
+	}, t)
+	assert.NotNil(t, aid)
+	assert.NotNil(t, key)
 }
 
 func TestRegister(t *testing.T) {
@@ -137,25 +142,78 @@ func TestRegister(t *testing.T) {
 	}
 }
 
-func TestAskAndTrigger(t *testing.T) {
+func TestAskError(t *testing.T) {
+	// ask not exist login
+	e := echo.New()
+	req := httptest.NewRequest(http.MethodPost, "/api/ask", strings.NewReader(`{
+        "ip": "127.0.0.3",
+        "browser": "Chrome"
+    }`))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec := httptest.NewRecorder()
+	c := e.NewContext(req, rec)
+	if assert.NoError(t, ask(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	}
+	// ask duplicate login
+	userLogin(e, Request{
+		Space: Space{
+			IP:      "127.0.0.3",
+			Browser: "Chrome",
+		},
+	}, t)
+	req = httptest.NewRequest(http.MethodPost, "/api/ask", strings.NewReader(`{
+        "ip": "127.0.0.3",
+        "browser": "Chrome"
+    }`))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec = httptest.NewRecorder()
+	c = e.NewContext(req, rec)
+	if assert.NoError(t, ask(c)) {
+		assert.Equal(t, http.StatusOK, rec.Code)
+	}
+	userLogin(e, Request{
+		Space: Space{
+			IP:      "127.0.0.3",
+			Browser: "Chrome",
+		},
+	}, t)
+	req = httptest.NewRequest(http.MethodPost, "/api/ask", strings.NewReader(`{
+        "ip": "127.0.0.2",
+        "browser": "Chrome"
+    }`))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	rec = httptest.NewRecorder()
+	c = e.NewContext(req, rec)
+	if assert.NoError(t, ask(c)) {
+		assert.Equal(t, http.StatusBadRequest, rec.Code)
+	}
+
+}
+
+func TestTrigger(t *testing.T) {
+	// special case, IP should be the unique
+	ip := "127.0.0.2"
 	// Setup
 	e := echo.New()
-	aid, _ := addUser(e, t)
+	aid, _ := userLogin(e, Request{
+		Space: Space{
+			IP:      ip,
+			Browser: "Chrome",
+		},
+	}, t)
 
 	req := httptest.NewRequest(http.MethodPost, "/api/ask", strings.NewReader(`{
-        "ip": "127.0.0.1",
+        "ip": "127.0.0.2",
         "browser": "Chrome"
     }`))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	rec := httptest.NewRecorder()
 	c := e.NewContext(req, rec)
 
-	token, _ := jwt.GenerateToken(aid.String())
-	c.Request().Header.Set(echo.HeaderAuthorization, token)
-	err := jwt.GenerateParseJwtMiddle(res.GenerateResponse)(ask)(c)
 	// Assertions
 	var uid string
-	if assert.NoError(t, err) {
+	if assert.NoError(t, ask(c)) {
 		assert.Equal(t, http.StatusOK, rec.Code)
 		var resp res.Response
 		assert.NoError(t, json.Unmarshal(rec.Body.Bytes(), &resp))
@@ -164,9 +222,14 @@ func TestAskAndTrigger(t *testing.T) {
 		uid = resp.Content
 	}
 
+	// check uid map aid
+	aidM, err := IDMapPoint.Get(uid)
+	assert.NoError(t, err)
+	assert.Equal(t, aid.String(), aidM)
+
 	req = httptest.NewRequest(http.MethodPost, "/api/trigger", strings.NewReader(`{
         "uid": "`+uid+`",
-        "ip": "127.0.0.1",
+        "ip": "`+ip+`",
         "browser": "Chrome"
     }`))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
@@ -185,7 +248,7 @@ func TestAskAndTrigger(t *testing.T) {
 	// test invalid
 	req = httptest.NewRequest(http.MethodPost, "/api/trigger", strings.NewReader(`{
         "uid": "`+uid+`",
-        "ip": "127.0.0.1",
+        "ip": "`+ip+`",
         "browser": "Safari"
     }`))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
