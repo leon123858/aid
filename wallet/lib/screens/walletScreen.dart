@@ -284,9 +284,6 @@ class AddElementDialog extends StatelessWidget {
             // Navigator.of(context).pop();
             // How to use:
             final keyPair = RSAUtils.generateRSAKeyPair();
-            // http request to 20.2.209.109
-            final apiWrapper = AIDApiClient(baseUrl: 'http://20.2.209.109');
-            await apiWrapper.init();
             final aid = apiWrapper.generateAID();
             final response = await apiWrapper.register(aid, keyPair.publicKey);
             print(response);

@@ -21,10 +21,16 @@ class AIDApiClient {
   final http.Client _httpClient = http.Client();
   final _deviceInfo = DeviceInfo();
 
+  var _isInit = false;
+
   AIDApiClient({this.baseUrl = 'http://127.0.0.1:8080'});
 
   Future<void> init() async {
+    if (_isInit) {
+      throw Exception('AIDApiClient has already been initialized');
+    }
     await _deviceInfo.initPlatformState();
+    _isInit = true;
   }
 
   String generateAID() {
@@ -85,3 +91,5 @@ class AIDApiException implements Exception {
   @override
   String toString() => 'AIDApiException: $statusCode\n$body';
 }
+
+final apiWrapper = AIDApiClient(baseUrl: 'http://20.2.209.109');

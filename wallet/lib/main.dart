@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wallet/utils/apiWrapper.dart';
 
 import 'screens/walletScreen.dart';
 
@@ -66,6 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+    apiWrapper.init();
     return const AIDWalletScreen();
   }
 }
