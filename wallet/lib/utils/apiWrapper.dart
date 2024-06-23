@@ -1,9 +1,10 @@
 import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:pointycastle/asymmetric/api.dart';
 import 'package:uuid/uuid.dart';
-import 'package:wallet/utils/rsa.dart';
 import 'package:wallet/utils/device.dart';
+import 'package:wallet/utils/rsa.dart';
 
 // How to use:
 // final keyPair = RSAUtils.generateRSAKeyPair();
@@ -27,7 +28,7 @@ class AIDApiClient {
 
   Future<void> init() async {
     if (_isInit) {
-      throw Exception('AIDApiClient has already been initialized');
+      return;
     }
     await _deviceInfo.initPlatformState();
     _isInit = true;
@@ -37,7 +38,8 @@ class AIDApiClient {
     return uuid.v4();
   }
 
-  Future<Map<String, dynamic>> login(String aid, RSAPrivateKey privateKey) async {
+  Future<Map<String, dynamic>> login(
+      String aid, RSAPrivateKey privateKey) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
     final sign = RSAUtils.rsaSign(privateKey, utf8.encode(timestamp));
     final b64Sign = base64.encode(sign);
@@ -55,7 +57,8 @@ class AIDApiClient {
     return _handleResponse(response);
   }
 
-  Future<Map<String, dynamic>> register(String aid, RSAPublicKey publicKey) async {
+  Future<Map<String, dynamic>> register(
+      String aid, RSAPublicKey publicKey) async {
     final response = await _httpClient.post(
       Uri.parse('$baseUrl/api/register'),
       headers: {'Content-Type': 'application/json'},

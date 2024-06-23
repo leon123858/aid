@@ -14,22 +14,23 @@ class DeviceInfo {
   Future<void> initPlatformState() async {
     try {
       if (kIsWeb) {
-        _deviceData = _readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
+        _deviceData =
+            _readWebBrowserInfo(await deviceInfoPlugin.webBrowserInfo);
       } else {
         _deviceData = switch (defaultTargetPlatform) {
           TargetPlatform.android =>
-              _readAndroidBuildData(await deviceInfoPlugin.androidInfo),
+            _readAndroidBuildData(await deviceInfoPlugin.androidInfo),
           TargetPlatform.iOS =>
-              _readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
+            _readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
           TargetPlatform.linux =>
-              _readLinuxDeviceInfo(await deviceInfoPlugin.linuxInfo),
+            _readLinuxDeviceInfo(await deviceInfoPlugin.linuxInfo),
           TargetPlatform.windows =>
-              _readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
+            _readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
           TargetPlatform.macOS =>
-              _readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo),
+            _readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo),
           TargetPlatform.fuchsia => <String, dynamic>{
-            'Error:': 'Fuchsia platform isn\'t supported'
-          },
+              'Error:': 'Fuchsia platform isn\'t supported'
+            },
         };
       }
     } on PlatformException {

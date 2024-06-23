@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:wallet/utils/apiWrapper.dart';
 
+import 'models/aid.dart';
 import 'screens/walletScreen.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'package:hive_flutter/hive_flutter.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // Initialize
+  await Hive.initFlutter();
+  await apiWrapper.init();
+  Hive.registerAdapter(AIDAdapter());
+  runApp(
+    const MyApp(),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -13,29 +24,38 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'AID Wallet',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
-        useMaterial3: true,
+    return ChangeNotifierProvider(
+      create: (context) => AIDListModel()..initAIDList(),
+      child: MaterialApp(
+        title: 'AID List Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: MaterialApp(
+          title: 'AID Wallet',
+          debugShowCheckedModeBanner: true,
+          theme: ThemeData(
+            // This is the theme of your application.
+            //
+            // TRY THIS: Try running your application with "flutter run". You'll see
+            // the application has a purple toolbar. Then, without quitting the app,
+            // try changing the seedColor in the colorScheme below to Colors.green
+            // and then invoke "hot reload" (save your changes or press the "hot
+            // reload" button in a Flutter-supported IDE, or press "r" if you used
+            // the command line to start the app).
+            //
+            // Notice that the counter didn't reset back to zero; the application
+            // state is not lost during the reload. To reset the state, use hot
+            // restart instead.
+            //
+            // This works for code too, not just values: Most code changes can be
+            // tested with just a hot reload.
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.white),
+            useMaterial3: true,
+          ),
+          home: const MyHomePage(),
+        ),
       ),
-      home: const MyHomePage(),
     );
   }
 }
@@ -52,13 +72,11 @@ class MyHomePage extends StatefulWidget {
   // used by the build method of the State. Fields in a Widget subclass are
   // always marked "final".
 
-
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -67,7 +85,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    apiWrapper.init();
     return const AIDWalletScreen();
   }
 }

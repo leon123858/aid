@@ -1,20 +1,13 @@
+import 'dart:convert';
 import 'dart:math';
+import 'dart:typed_data';
 
-import 'package:pointycastle/api.dart';
+import 'package:flutter/foundation.dart';
 import 'package:pointycastle/asn1/primitives/asn1_bit_string.dart';
 import 'package:pointycastle/asn1/primitives/asn1_integer.dart';
 import 'package:pointycastle/asn1/primitives/asn1_null.dart';
 import 'package:pointycastle/asn1/primitives/asn1_object_identifier.dart';
 import 'package:pointycastle/asn1/primitives/asn1_sequence.dart';
-import 'package:pointycastle/asymmetric/api.dart';
-import 'package:pointycastle/digests/sha256.dart';
-import 'package:pointycastle/key_generators/api.dart';
-import 'package:pointycastle/key_generators/rsa_key_generator.dart';
-
-import 'dart:convert';
-import 'dart:typed_data';
-
-import 'package:pointycastle/signers/rsa_signer.dart';
 import 'package:pointycastle/export.dart';
 
 // How to use:
@@ -31,10 +24,11 @@ import 'package:pointycastle/export.dart';
 // final result = RSAUtils.rsaVerify(keyPair.publicKey, data, signature);
 // print(result);
 
-AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> _generateRSAKeyPair() {
+AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> _generateRSAKeyPair(_) {
   // 創建一個安全隨機數生成器
   final secureRandom = SecureRandom('Fortuna')
-    ..seed(KeyParameter(Uint8List.fromList(List.generate(32, (_) => Random.secure().nextInt(255)))));
+    ..seed(KeyParameter(Uint8List.fromList(
+        List.generate(32, (_) => Random.secure().nextInt(255)))));
 
   // 創建 RSA 密鑰生成器
   final keyGen = RSAKeyGenerator()
@@ -80,8 +74,10 @@ String _encodePrivateKeyToPem(RSAPrivateKey privateKey) {
   sequence.add(ASN1Integer(privateKey.privateExponent!));
   sequence.add(ASN1Integer(privateKey.p));
   sequence.add(ASN1Integer(privateKey.q));
-  sequence.add(ASN1Integer(privateKey.privateExponent! % (privateKey.p! - BigInt.from(1))));
-  sequence.add(ASN1Integer(privateKey.privateExponent! % (privateKey.q! - BigInt.from(1))));
+  sequence.add(ASN1Integer(
+      privateKey.privateExponent! % (privateKey.p! - BigInt.from(1))));
+  sequence.add(ASN1Integer(
+      privateKey.privateExponent! % (privateKey.q! - BigInt.from(1))));
   sequence.add(ASN1Integer(privateKey.q?.modInverse(privateKey.p!)));
 
   final dataBase64 = base64.encode(sequence.encode());
@@ -119,8 +115,8 @@ bool _rsaVerify(
 
 class RSAUtils {
   // 生成 RSA 密鑰對
-  static AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAKeyPair() {
-    return _generateRSAKeyPair();
+  static AsymmetricKeyPair<RSAPublicKey, RSAPrivateKey> generateRSAKeyPair(_) {
+    return _generateRSAKeyPair(null);
   }
 
   // 將 RSAPublicKey 轉換為 PEM 格式
