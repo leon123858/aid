@@ -43,6 +43,9 @@ func login(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return err
 	}
+	if req.IP == "" {
+		req.IP = c.RealIP()
+	}
 	aidUUID, err := uuid.Parse(req.AID)
 	if err != nil {
 		return c.JSON(400, res.GenerateResponse(false, "invalid AID"))
@@ -102,6 +105,9 @@ func register(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(400, res.GenerateResponse(false, "invalid request body"))
 	}
+	if req.IP == "" {
+		req.IP = c.RealIP()
+	}
 	if !rsa.IsValidPublicKey([]byte(req.PublicKey)) {
 		return c.JSON(400, res.GenerateResponse(false, "invalid public key"))
 	}
@@ -158,6 +164,9 @@ func ask(c echo.Context) error {
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(400, res.GenerateResponse(false, "invalid request body"))
 	}
+	if req.IP == "" {
+		req.IP = c.RealIP()
+	}
 	get, err := RecordCache.Get(mlm.KeyItem{
 		IP:      req.IP,
 		Browser: req.Browser,
@@ -195,6 +204,9 @@ func check(c echo.Context) error {
 	req := CheckRequest{}
 	if err := c.Bind(&req); err != nil {
 		return err
+	}
+	if req.IP == "" {
+		req.IP = c.RealIP()
 	}
 	aid, err := IDMapPoint.Get(req.UID)
 	if err != nil || aid == "" {

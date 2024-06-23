@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/getwidget.dart';
-import '../utils/apiWrapper.dart';
 
+import '../utils/apiWrapper.dart';
 import '../utils/rsa.dart';
 
 class AIDWalletScreen extends StatelessWidget {
@@ -282,9 +282,11 @@ class AddElementDialog extends StatelessWidget {
         ElevatedButton(
           onPressed: () async {
             // Navigator.of(context).pop();
+            // How to use:
             final keyPair = RSAUtils.generateRSAKeyPair();
             // http request to 20.2.209.109
             final apiWrapper = AIDApiClient(baseUrl: 'http://20.2.209.109');
+            await apiWrapper.init();
             final aid = apiWrapper.generateAID();
             final response = await apiWrapper.register(aid, keyPair.publicKey);
             print(response);

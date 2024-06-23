@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:pointycastle/asymmetric/api.dart';
 import 'package:uuid/uuid.dart';
 import 'package:wallet/utils/rsa.dart';
+import 'package:wallet/utils/device.dart';
 
 // How to use:
 // final keyPair = RSAUtils.generateRSAKeyPair();
@@ -18,8 +19,13 @@ class AIDApiClient {
   final String baseUrl;
   final uuid = const Uuid();
   final http.Client _httpClient = http.Client();
+  final _deviceInfo = DeviceInfo();
 
   AIDApiClient({this.baseUrl = 'http://127.0.0.1:8080'});
+
+  Future<void> init() async {
+    await _deviceInfo.initPlatformState();
+  }
 
   String generateAID() {
     return uuid.v4();
@@ -34,8 +40,8 @@ class AIDApiClient {
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'aid': aid,
-        'browser': "Chrome",
-        'ip': "127.0.0.1",
+        'browser': _deviceInfo.deviceHash,
+        'ip': "",
         'sign': b64Sign,
         'timestamp': timestamp,
       }),
@@ -49,8 +55,8 @@ class AIDApiClient {
       headers: {'Content-Type': 'application/json'},
       body: json.encode({
         'aid': aid,
-        'browser': "Chrome",
-        'ip': "127.0.0.1",
+        'browser': _deviceInfo.deviceHash,
+        'ip': "",
         'publicKey': RSAUtils.encodePublicKeyToPem(publicKey),
       }),
     );
@@ -58,11 +64,9 @@ class AIDApiClient {
   }
 
   Map<String, dynamic> _handleResponse(http.Response response) {
-    print(response.statusCode);
     if (response.statusCode >= 200 && response.statusCode < 300) {
       return json.decode(response.body);
     } else {
-      print(response.body);
       throw AIDApiException(response.statusCode, response.body);
     }
   }

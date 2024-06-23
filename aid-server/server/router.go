@@ -2,6 +2,7 @@ package server
 
 import (
 	_ "aid-server/docs"
+	"aid-server/pkg/device"
 	"aid-server/pkg/jwt"
 	"aid-server/pkg/res"
 	"github.com/labstack/echo/v4"
@@ -40,6 +41,7 @@ func generateRouter() *echo.Echo {
 	// Add your routes here
 	api := router.Group("/api")
 	{
+		api.Use(device.SetRealIP)
 		api.POST("/login", login)
 		api.POST("/register", register)
 		api.POST("/ask", ask)
