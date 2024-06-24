@@ -76,6 +76,35 @@ func TestMultiLevelMap(t *testing.T) {
 		assert.Nil(t, results)
 	})
 
+	t.Run("Set and Get with Clear", func(t *testing.T) {
+		m := NewMultiLevelMap().(*MultiLevelMapImp)
+		testCases := []struct {
+			key   KeyItem
+			value uuid.UUID
+		}{
+			{KeyItem{IP: "127.0.0.1", Browser: "Chrome"}, list[0]},
+			{KeyItem{IP: "127.0.0.1", Browser: "Chrome"}, list[1]},
+		}
+
+		err := m.Set(testCases[0].key, testCases[0].value)
+		assert.NoError(t, err, "Set() should not return an error")
+		results, err := m.Get(testCases[0].key)
+		assert.NoError(t, err, "Get() should not return an error")
+		assert.Equal(t, 1, len(results), "Get() should return the set value")
+
+		err = m.Set(testCases[1].key, testCases[1].value)
+		assert.NoError(t, err, "Set() should not return an error")
+		results, err = m.Get(testCases[1].key)
+		assert.NoError(t, err, "Get() should not return an error")
+		assert.Equal(t, 2, len(results), "Get() should return the set value")
+
+		closeDuration = time.Second
+		time.Sleep(2 * time.Second)
+		results, err = m.Get(testCases[0].key)
+		assert.Nil(t, err)
+		assert.Equal(t, list[1], results[0])
+	})
+
 	t.Run("MaxSize", func(t *testing.T) {
 		m := NewMultiLevelMap().(*MultiLevelMapImp)
 		for i := 0; i <= maxSize+1; i++ {

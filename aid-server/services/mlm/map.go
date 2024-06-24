@@ -1,11 +1,13 @@
 package mlm
 
 import (
+	"aid-server/configs"
 	"errors"
 	"github.com/emirpasic/gods/maps/hashmap"
 	llq "github.com/emirpasic/gods/queues/linkedlistqueue"
 	"github.com/google/uuid"
 	"sync"
+	"time"
 )
 
 /*
@@ -16,12 +18,19 @@ import (
 	it can find same value by all properties in struct quickly
 */
 
+var closeDuration = configs.Configs.Time.LoginCache
+
 const maxSize = 100
 const clearSize = 30
 
 type KeyItem struct {
 	IP      string
 	Browser string
+}
+
+type ValueItem struct {
+	AID  uuid.UUID
+	Time time.Time
 }
 
 type MultiLevelMap interface {
@@ -66,20 +75,24 @@ func (m *MultiLevelMapImp) Set(key KeyItem, value uuid.UUID) error {
 	if !ok {
 		m.size++
 		m.keyListQueue.Enqueue(key)
-		m.hm.Put(key, []uuid.UUID{
-			value,
-		})
+		m.hm.Put(key, []ValueItem{{
+			AID:  value,
+			Time: time.Now(),
+		}})
 		return nil
 	}
 	// if key exists, concat the value
-	arr := data.([]uuid.UUID)
+	arr := data.([]ValueItem)
 	// check if value exists
 	for _, v := range arr {
-		if v == value {
+		if v.AID == value {
 			return nil
 		}
 	}
-	m.hm.Put(key, append(arr, value))
+	m.hm.Put(key, append(arr, ValueItem{
+		AID:  value,
+		Time: time.Now(),
+	}))
 	return nil
 }
 
@@ -90,6 +103,26 @@ func (m *MultiLevelMapImp) Get(key KeyItem) ([]uuid.UUID, error) {
 	if !ok {
 		return nil, errors.New("key not found")
 	}
-	res := v.([]uuid.UUID)
+	// sort by time
+	arr := v.([]ValueItem)
+	for i := 0; i < len(arr); i++ {
+		for j := i + 1; j < len(arr); j++ {
+			if arr[i].Time.Before(arr[j].Time) {
+				arr[i], arr[j] = arr[j], arr[i]
+			}
+		}
+	}
+	// get first 2 item if more than 2
+	if len(arr) > 2 {
+		arr = arr[:2]
+		// check if each item time is in 5 minutes
+		if arr[0].Time.Add(closeDuration).Before(arr[1].Time) {
+			arr = arr[:1]
+		}
+	}
+	res := make([]uuid.UUID, 0)
+	for _, v := range arr {
+		res = append(res, v.AID)
+	}
 	return res, nil
 }
