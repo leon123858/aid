@@ -43,7 +43,7 @@ jobs:
         working-directory: ./wallet
 
       - name: Build Web
-        run: flutter build web --release
+        run: flutter build web --release --base-href="/leon123858/"
         working-directory: ./wallet
 
       - name: Setup Pages
