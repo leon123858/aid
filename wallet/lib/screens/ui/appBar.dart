@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/appbar/gf_appbar.dart';
 
-import '../components/addElementDialog.dart';
+import '../../components/addElementDialog.dart';
 
 GFAppBar appBar(BuildContext context, String title) {
   return GFAppBar(

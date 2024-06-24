@@ -43,6 +43,9 @@ dependencies:
   http: ^1.2.0
   device_info_plus: ^9.1.2
   provider: ^6.1.2
+  url_launcher: ^6.3.0
+  super_clipboard: ^0.8.5
+  crypton: ^2.2.1
 
 dev_dependencies:
   flutter_test:

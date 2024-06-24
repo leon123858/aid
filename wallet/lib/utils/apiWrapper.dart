@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:pointycastle/asymmetric/api.dart';
 import 'package:uuid/uuid.dart';
+import 'package:wallet/constants/config.dart';
 import 'package:wallet/utils/device.dart';
 import 'package:wallet/utils/rsa.dart';
 
@@ -95,4 +96,4 @@ class AIDApiException implements Exception {
   String toString() => 'AIDApiException: $statusCode\n$body';
 }
 
-final apiWrapper = AIDApiClient(baseUrl: 'http://20.2.209.109');
+final apiWrapper = AIDApiClient(baseUrl: serverUrl);

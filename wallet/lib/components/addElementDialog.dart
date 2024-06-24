@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:getwidget/components/loader/gf_loader.dart';
@@ -8,7 +7,7 @@ import 'package:provider/provider.dart';
 import '../models/aid.dart';
 import '../utils/apiWrapper.dart';
 import '../utils/rsa.dart';
-import 'errMsg.dart';
+import 'msg.dart';
 
 class AddElementDialog extends StatefulWidget {
   const AddElementDialog({super.key});
@@ -53,9 +52,11 @@ class AddElementDialogState extends State<AddElementDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: _isLoading ? null : () {
-            Navigator.of(context).pop();
-          },
+          onPressed: _isLoading
+              ? null
+              : () {
+                  Navigator.of(context).pop();
+                },
           child: const Text('Cancel'),
         ),
         ElevatedButton(

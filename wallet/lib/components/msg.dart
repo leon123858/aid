@@ -15,3 +15,17 @@ void showErrorToast(BuildContext context, String message) {
     ),
   );
 }
+
+void showSuccessToast(BuildContext context, String message) {
+  GFToast.showToast(
+    message,
+    context,
+    toastPosition: GFToastPosition.BOTTOM,
+    textStyle: const TextStyle(fontSize: 16, color: Colors.white),
+    backgroundColor: Colors.green,
+    trailing: const Icon(
+      Icons.check,
+      color: Colors.white,
+    ),
+  );
+}

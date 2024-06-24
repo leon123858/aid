@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:crypton/crypton.dart' as crypton;
 import 'package:flutter/foundation.dart';
 import 'package:pointycastle/asn1/primitives/asn1_bit_string.dart';
 import 'package:pointycastle/asn1/primitives/asn1_integer.dart';
@@ -124,9 +125,18 @@ class RSAUtils {
     return _encodePublicKeyToPem(publicKey);
   }
 
-  // 將 RSAPrivateKey 轉換為 PEM 格式
   static String encodePrivateKeyToPem(RSAPrivateKey privateKey) {
     return _encodePrivateKeyToPem(privateKey);
+  }
+
+  static RSAPublicKey parsePublicKeyFromPem(pemString) {
+    // 解析 PEM 格式的公鑰
+    return crypton.RSAPublicKey.fromPEM(pemString) as RSAPublicKey;
+  }
+
+  static RSAPrivateKey parsePrivateKeyFromPem(pemString) {
+    // 解析 PEM 格式的私鑰
+    return crypton.RSAPrivateKey.fromPEM(pemString) as RSAPrivateKey;
   }
 
   // 使用 RSA 私鑰對數據進行簽名

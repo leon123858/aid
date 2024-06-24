@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:getwidget/components/search_bar/gf_search_bar.dart';
-import 'package:wallet/screens/appBar.dart';
-import 'package:wallet/screens/drawer.dart';
+import 'package:provider/provider.dart';
+import 'package:wallet/components/msg.dart';
+import 'package:wallet/screens/ui/aidSearchBar.dart';
+import 'package:wallet/screens/ui/appBar.dart';
+import 'package:wallet/screens/ui/drawer.dart';
 
-import 'aidList.dart';
+import '../models/aid.dart';
+import 'ui/aidList.dart';
 
 class AIDWalletScreen extends StatelessWidget {
   const AIDWalletScreen({super.key});
@@ -12,39 +15,32 @@ class AIDWalletScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: appBar(context, "AID Wallet"),
-      drawer: drawer(context),
+      drawer: walletDrawer(context),
       body: Column(
         children: [
           Container(
             color: Colors.white,
             padding: const EdgeInsets.all(16.0),
-            child: GFSearchBar(
-              searchList: const ['search'],
-              hideSearchBoxWhenItemSelected: false,
-              overlaySearchListHeight: 0,
-              searchQueryBuilder: (query, list) {
-                return list
-                    .where((item) =>
-                        item.toLowerCase().contains(query.toLowerCase()))
-                    .toList();
+            child: SimpleAIDSearchBar(
+              onSearch: (value) async {
+                final queryStr = value.toLowerCase();
+                final provider =
+                    Provider.of<AIDListModel>(context, listen: false);
+                try {
+                  await provider.getAIDByKeyword(queryStr);
+                  if (context.mounted) {
+                    showSuccessToast(context, "Search completed");
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    showErrorToast(context, e.toString());
+                  }
+                }
               },
-              overlaySearchListItemBuilder: (String item) {
-                return Container();
-              },
-              searchBoxInputDecoration: InputDecoration(
-                hintText: 'Search AID',
-                hintStyle: const TextStyle(color: Colors.grey),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                  borderSide: BorderSide.none,
-                ),
-                filled: true,
-                fillColor: Colors.grey[200],
-              ),
             ),
           ),
-          const Expanded(
-            child: AIDListView(),
+          Expanded(
+            child: aidListView(),
           ),
         ],
       ),

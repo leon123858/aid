@@ -1,8 +1,13 @@
-
-
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:wallet/components/msg.dart';
+import 'package:wallet/constants/config.dart';
+import 'package:wallet/utils/clipboard.dart';
 
-Drawer drawer(BuildContext context) {
+import '../../models/aid.dart';
+
+Drawer walletDrawer(BuildContext context) {
   return Drawer(
     child: Container(
       color: Colors.black26,
@@ -38,20 +43,14 @@ Drawer drawer(BuildContext context) {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
-              onPressed: () {
-                // Handle button press
-              },
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(double.infinity, 40),
-              ),
-              child: const Text('Create Wallet'),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ElevatedButton(
-              onPressed: () {
-                // Handle button press
+              onPressed: () async {
+                final provider =
+                    Provider.of<AIDListModel>(context, listen: false);
+                final list = await copyRead();
+                await provider.importAIDList(list);
+                if (context.mounted) {
+                  showSuccessToast(context, 'Wallet copied to clipboard');
+                }
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 40),
@@ -62,8 +61,14 @@ Drawer drawer(BuildContext context) {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
-              onPressed: () {
-                // Handle button press
+              onPressed: () async {
+                final provider =
+                    Provider.of<AIDListModel>(context, listen: false);
+                await provider.initAIDList();
+                await copyWrite(provider.exportAIDList);
+                if (context.mounted) {
+                  showSuccessToast(context, 'Get copy from clipboard');
+                }
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 40),
@@ -74,8 +79,12 @@ Drawer drawer(BuildContext context) {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 // Handle button press
+                final provider =
+                    Provider.of<AIDListModel>(context, listen: false);
+                await provider.initAIDList();
+                await provider.clearAIDList();
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 40),
@@ -86,8 +95,15 @@ Drawer drawer(BuildContext context) {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 // Handle button press
+                const url = documentUrl;
+                Uri uri = Uri.parse(url);
+                if (await canLaunchUrl(uri)) {
+                  await launchUrl(uri);
+                } else {
+                  throw 'Could not launch $url';
+                }
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(double.infinity, 40),

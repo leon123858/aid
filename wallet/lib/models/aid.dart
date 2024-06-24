@@ -27,18 +27,52 @@ class AID extends HiveObject {
     required this.publicKey,
     required this.privateKey,
   });
+
+  static fromJson(Map item) {
+    return AID(
+      aid: item['aid'],
+      name: item['name'],
+      description: item['description'],
+      publicKey: item['publicKey'],
+      privateKey: item['privateKey'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'aid': aid,
+      'name': name,
+      'description': description,
+      'publicKey': publicKey,
+      'privateKey': privateKey,
+    };
+  }
 }
 
 class AIDListModel extends ChangeNotifier {
   final List<AID> _aidList = [];
   late Box<AID> _aidBox;
 
-  bool isInitialized = false;
-
   // getter all values in db
-  List<AID> get aidList => _aidBox.values.toList();
+  List<AID> get aidList => _aidList;
 
   int get aidCount => _aidList.length;
+
+  List<AID> get exportAIDList => _aidBox.values.toList();
+
+  Future<void> importAIDList(List<AID> value) async {
+    // clear UI List
+    _aidList.clear();
+    // add to UI List
+    _aidList.addAll(value);
+    // clear db
+    await _aidBox.clear();
+    // add to db
+    for (var aid in value) {
+      await _aidBox.put(aid.aid, aid);
+    }
+    notifyListeners();
+  }
 
   Future<void> addAID(AID aid) async {
     // add to UI List
@@ -46,25 +80,6 @@ class AIDListModel extends ChangeNotifier {
     // add to db
     await _aidBox.put(aid.aid, aid);
     notifyListeners();
-  }
-
-  Future<void> removeAID(String localId) async {
-    // remove from UI List
-    _aidList.removeWhere((aid) => aid.aid == localId);
-    // remove from db
-    await _aidBox.delete(localId);
-    notifyListeners();
-  }
-
-  Future<void> updateAID(AID updatedAID) async {
-    final index = _aidList.indexWhere((aid) => aid.aid == updatedAID.aid);
-    if (index != -1) {
-      // update UI List
-      _aidList[index] = updatedAID;
-      // update db
-      await _aidBox.put(updatedAID.aid, updatedAID);
-      notifyListeners();
-    }
   }
 
   Future<void> clearAIDList() async {
@@ -79,18 +94,16 @@ class AIDListModel extends ChangeNotifier {
     // clear UI List
     _aidList.clear();
     // get from db
-    _aidBox.toMap().forEach((key, value) {
-      if (value.name.contains(keyword) || value.description.contains(keyword)) {
-        _aidList.add(value);
+    _aidBox.values.toList().forEach((aid) {
+      if (aid.name.toLowerCase().contains(keyword) ||
+          aid.description.toLowerCase().contains(keyword)) {
+        _aidList.add(aid);
       }
     });
     notifyListeners();
   }
 
   Future<void> initAIDList() async {
-    if (isInitialized) {
-      return;
-    }
     // clear UI List
     _aidList.clear();
     // link db
@@ -100,10 +113,7 @@ class AIDListModel extends ChangeNotifier {
       _aidBox = Hive.box<AID>('aidBox');
     }
     // full UI List
-    _aidBox.toMap().forEach((key, value) {
-      _aidList.add(value);
-    });
-    isInitialized = true;
+    _aidList.addAll(_aidBox.values);
     notifyListeners();
   }
 }
