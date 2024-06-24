@@ -7,16 +7,6 @@ import 'package:wallet/constants/config.dart';
 import 'package:wallet/utils/device.dart';
 import 'package:wallet/utils/rsa.dart';
 
-// How to use:
-// final keyPair = RSAUtils.generateRSAKeyPair();
-// // http request to 20.2.209.109
-// final apiWrapper = AIDApiClient(baseUrl: 'http://20.2.209.109');
-// final aid = apiWrapper.generateAID();
-// final response = await apiWrapper.register(aid, keyPair.publicKey);
-// print(response);
-// final response2 = await apiWrapper.login(aid, keyPair.privateKey);
-// print(response2);
-
 class AIDApiClient {
   final String baseUrl;
   final uuid = const Uuid();

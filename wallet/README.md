@@ -14,3 +14,4 @@ use IDE to run the flutter project
 ## Build
 
 - Mac: `flutter build macos`
+- Web: `flutter build web`
