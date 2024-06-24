@@ -24,8 +24,9 @@ class DeviceInfo {
             _readIosDeviceInfo(await deviceInfoPlugin.iosInfo),
           TargetPlatform.linux =>
             _readLinuxDeviceInfo(await deviceInfoPlugin.linuxInfo),
-          TargetPlatform.windows =>
-            _readWindowsDeviceInfo(await deviceInfoPlugin.windowsInfo),
+          TargetPlatform.windows => <String, dynamic>{
+              'Error:': 'Fuchsia platform isn\'t supported'
+            },
           TargetPlatform.macOS =>
             _readMacOsDeviceInfo(await deviceInfoPlugin.macOsInfo),
           TargetPlatform.fuchsia => <String, dynamic>{
@@ -150,32 +151,32 @@ Map<String, dynamic> _readMacOsDeviceInfo(MacOsDeviceInfo data) {
   };
 }
 
-Map<String, dynamic> _readWindowsDeviceInfo(WindowsDeviceInfo data) {
-  return <String, dynamic>{
-    'numberOfCores': data.numberOfCores,
-    'computerName': data.computerName,
-    'systemMemoryInMegabytes': data.systemMemoryInMegabytes,
-    'userName': data.userName,
-    'majorVersion': data.majorVersion,
-    'minorVersion': data.minorVersion,
-    'buildNumber': data.buildNumber,
-    'platformId': data.platformId,
-    'csdVersion': data.csdVersion,
-    'servicePackMajor': data.servicePackMajor,
-    'servicePackMinor': data.servicePackMinor,
-    'suitMask': data.suitMask,
-    'productType': data.productType,
-    'reserved': data.reserved,
-    'buildLab': data.buildLab,
-    'buildLabEx': data.buildLabEx,
-    'digitalProductId': data.digitalProductId,
-    'displayVersion': data.displayVersion,
-    'editionId': data.editionId,
-    'installDate': data.installDate,
-    'productId': data.productId,
-    'productName': data.productName,
-    'registeredOwner': data.registeredOwner,
-    'releaseId': data.releaseId,
-    'deviceId': data.deviceId,
-  };
-}
+// Map<String, dynamic> _readWindowsDeviceInfo(WindowsDeviceInfo data) {
+//   return <String, dynamic>{
+//     'numberOfCores': data.numberOfCores,
+//     'computerName': data.computerName,
+//     'systemMemoryInMegabytes': data.systemMemoryInMegabytes,
+//     'userName': data.userName,
+//     'majorVersion': data.majorVersion,
+//     'minorVersion': data.minorVersion,
+//     'buildNumber': data.buildNumber,
+//     'platformId': data.platformId,
+//     'csdVersion': data.csdVersion,
+//     'servicePackMajor': data.servicePackMajor,
+//     'servicePackMinor': data.servicePackMinor,
+//     'suitMask': data.suitMask,
+//     'productType': data.productType,
+//     'reserved': data.reserved,
+//     'buildLab': data.buildLab,
+//     'buildLabEx': data.buildLabEx,
+//     'digitalProductId': data.digitalProductId,
+//     'displayVersion': data.displayVersion,
+//     'editionId': data.editionId,
+//     'installDate': data.installDate,
+//     'productId': data.productId,
+//     'productName': data.productName,
+//     'registeredOwner': data.registeredOwner,
+//     'releaseId': data.releaseId,
+//     'deviceId': data.deviceId,
+//   };
+// }
