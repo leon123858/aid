@@ -36,12 +36,15 @@ jobs:
 
       - name: Get dependencies
         run: flutter pub get
+        working-directory: ./wallet
 
       - name: Run tests
         run: flutter test
+        working-directory: ./wallet
 
       - name: Build Web
         run: flutter build web --release
+        working-directory: ./wallet
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
@@ -49,7 +52,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          path: './build/web'  # 更改为 Flutter Web 构建输出目录
+          path: './wallet/build/web'  # 更改为 Flutter Web 构建输出目录
 
       - name: Deploy to GitHub Pages
         id: deployment
