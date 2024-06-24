@@ -13,4 +13,4 @@ use IDE to run the flutter project
 
 ## Build
 
-(SKIP)
+- Mac: `flutter build macos`
