@@ -15,6 +15,8 @@ class AIDApiClient {
 
   var _isInit = false;
 
+  String get deviceInfoHash => _deviceInfo.deviceHash;
+
   AIDApiClient({this.baseUrl = 'http://127.0.0.1:8080'});
 
   Future<void> init() async {

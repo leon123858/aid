@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wallet/components/msg.dart';
 import 'package:wallet/constants/config.dart';
+import 'package:wallet/utils/apiWrapper.dart';
 import 'package:wallet/utils/clipboard.dart';
 
 import '../../models/aid.dart';
@@ -90,6 +91,27 @@ Drawer walletDrawer(BuildContext context) {
                 minimumSize: const Size(double.infinity, 40),
               ),
               child: const Text('Clear Wallet'),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () async {
+                try {
+                  await copyWriteString(apiWrapper.deviceInfoHash);
+                  if (context.mounted) {
+                    showSuccessToast(context, 'Get copy from clipboard');
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    showErrorToast(context, "$e");
+                  }
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 40),
+              ),
+              child: const Text('Copy Device fingerprint'),
             ),
           ),
           Padding(
