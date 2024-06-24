@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:crypton/crypton.dart';
 import 'package:http/http.dart' as http;
-import 'package:pointycastle/asymmetric/api.dart';
 import 'package:uuid/uuid.dart';
 import 'package:wallet/constants/config.dart';
 import 'package:wallet/utils/device.dart';
@@ -42,7 +42,7 @@ class AIDApiClient {
   Future<Map<String, dynamic>> login(
       String aid, RSAPrivateKey privateKey) async {
     final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-    final sign = RSAUtils.rsaSign(privateKey, utf8.encode(timestamp));
+    final sign = RSAUtils.rsaSign(privateKey, timestamp);
     final b64Sign = base64.encode(sign);
     final response = await _httpClient.post(
       Uri.parse('$baseUrl/api/login'),

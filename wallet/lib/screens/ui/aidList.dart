@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:wallet/utils/apiWrapper.dart';
+import 'package:wallet/utils/clipboard.dart';
 import 'package:wallet/utils/rsa.dart';
 
 import '../../components/msg.dart';
@@ -51,7 +52,7 @@ Consumer<AIDListModel> aidListView() {
                         // 實現登錄邏輯
                         try {
                           final key =
-                          RSAUtils.parsePrivateKeyFromPem(aid.privateKey);
+                              RSAUtils.parsePrivateKeyFromPem(aid.privateKey);
                           final response = await apiWrapper.login(aid.aid, key);
                           if (context.mounted) {
                             if (response['result']) {
@@ -77,8 +78,28 @@ Consumer<AIDListModel> aidListView() {
                     IconButton(
                       icon: const Icon(Icons.copy),
                       color: Colors.grey,
-                      onPressed: () {
+                      onPressed: () async {
                         // 實現複製邏輯
+                        try {
+                          final key =
+                              RSAUtils.parsePrivateKeyFromPem(aid.privateKey);
+                          final response = await apiWrapper.login(aid.aid, key);
+                          if (context.mounted) {
+                            if (response['result']) {
+                              await copyWriteString(response['content']);
+                              if (context.mounted) {
+                                showSuccessToast(
+                                    context, 'copy success: 限制時間內有效');
+                              }
+                            } else {
+                              throw Exception(response['content']);
+                            }
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            showErrorToast(context, "throw error msg:$e");
+                          }
+                        }
                       },
                     ),
                   ],

@@ -2,15 +2,15 @@
 
 A new Flutter project.
 
-## Getting Started
+## Development
 
-This project is a starting point for a Flutter application.
+init the project
 
-A few resources to get you started if this is your first Flutter project:
+- flutter `flutter pub get`
+- rust `rustup update`
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+use IDE to run the flutter project
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Build
+
+(SKIP)

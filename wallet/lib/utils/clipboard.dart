@@ -45,3 +45,13 @@ Future<void> copyWrite(List<AID> aids) async {
       Formats.plainText(jsonEncode(aids.map((aid) => aid.toJson()).toList())));
   await clipboard.write([item]);
 }
+
+Future<void> copyWriteString(String str) async {
+  final clipboard = SystemClipboard.instance;
+  if (clipboard == null) {
+    throw Exception('Clipboard API is not supported on this platform.');
+  }
+  final item = DataWriterItem();
+  item.add(Formats.plainText(str));
+  await clipboard.write([item]);
+}
