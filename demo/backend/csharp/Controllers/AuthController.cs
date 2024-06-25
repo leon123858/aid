@@ -51,6 +51,7 @@ public class AuthController : ControllerBase
                         foreach (var uid in uidList)
                         {
                             var res = await service.check(uid, request.IP, request.fingerprint);
+                            Console.WriteLine(res.result + "/" + res.content);
                             if (res.result & res.content == "online")
                             {
                                 onlineList.Add(uid);

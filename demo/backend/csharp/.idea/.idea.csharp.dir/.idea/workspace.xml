@@ -9,7 +9,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="250c85b1-21a5-42de-ad2a-521f7bcc49e8" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.csharp.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.csharp.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Controllers/AuthController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/AuthController.cs" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -108,7 +110,7 @@
       <workItem from="1719292590910" duration="552000" />
       <workItem from="1719293151059" duration="97000" />
       <workItem from="1719296899305" duration="634000" />
-      <workItem from="1719308869090" duration="17182000" />
+      <workItem from="1719308869090" duration="17871000" />
     </task>
     <servers />
   </component>
