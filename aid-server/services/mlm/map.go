@@ -120,9 +120,17 @@ func (m *MultiLevelMapImp) Get(key KeyItem) ([]uuid.UUID, error) {
 			arr = arr[:1]
 		}
 	}
+	// if value is too old, remove it
+	if arr[0].Time.Add(configs.Configs.Jwt.Duration).Before(time.Now()) {
+		m.hm.Remove(key)
+		m.size--
+		return nil, errors.New("value is too old")
+	}
+	// extract AID
 	res := make([]uuid.UUID, 0)
 	for _, v := range arr {
 		res = append(res, v.AID)
 	}
+
 	return res, nil
 }

@@ -18,7 +18,7 @@ public class ChatController : ControllerBase
     {
         _semanticKernelApp = semanticKernelApp;
     }
-
+    
     [HttpPost]
     [Consumes("application/json")]
     public async Task<IActionResult> ProcessMessage(AIChatRequest request)

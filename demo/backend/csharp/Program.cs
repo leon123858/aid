@@ -16,7 +16,11 @@ builder.Services.AddSingleton<ISemanticKernelApp, SemanticKernelApp>();
 
 builder.Services
     .AddControllers()
-    .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter<AIChatRole>(JsonNamingPolicy.CamelCase)));
+    .AddJsonOptions(o =>
+        o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter<AIChatRole>(JsonNamingPolicy.CamelCase)));
+    
+builder.Services
+    .AddSingleton<UserDatabase>(sp => new UserDatabase("./users.db"));
 
 var app = builder.Build();
 

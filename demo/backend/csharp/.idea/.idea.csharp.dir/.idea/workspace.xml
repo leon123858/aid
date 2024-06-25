@@ -9,8 +9,32 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="250c85b1-21a5-42de-ad2a-521f7bcc49e8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/startup.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/appsettings.Development.json" beforeDir="false" afterPath="$PROJECT_DIR$/appsettings.Development.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Controllers/AuthController.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Model/AIAuthRequest.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Model/AIAuthResponse.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Services/AID.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Services/Users.cs" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Auth.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Provider.tsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../frontend/js/react/src/utils/apiWrapper.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../frontend/js/react/src/utils/deviceFingerprinter.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../aid-server/server/controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/../../../aid-server/server/controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../aid-server/server/controller_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/../../../aid-server/server/controller_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../aid-server/services/mlm/map.go" beforeDir="false" afterPath="$PROJECT_DIR$/../../../aid-server/services/mlm/map.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.csharp.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.csharp.dir/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChatProtocolBackend.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ChatProtocolBackend.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Controllers/ChatController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/ChatController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/startup.sh" beforeDir="false" afterPath="$PROJECT_DIR$/startup.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/App.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/App.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/Readme.tsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/assets/caution.svg" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/assets/caution.svg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/main.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/tsconfig.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../../wallet/lib/constants/config.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../../wallet/lib/constants/config.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -28,10 +52,14 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/microsoft/ai-chat-protocol.git&quot;,
+    &quot;url&quot;: &quot;https://github.com/leon123858/aid.git&quot;,
     &quot;accountId&quot;: &quot;8e620767-4b6e-49a8-b3c1-7a4b20b20435&quot;
   }
 }</component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="mock:///Users/leonlin/Desktop/git/aid/demo/backend/csharp/Program.cs" root0="SKIP_HIGHLIGHTING" />
+  </component>
+  <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
 }</component>
@@ -40,26 +68,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
-    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
-    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
-    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
-    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.build&quot;,
-    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    ".NET Launch Settings Profile.ChatProtocolBackend: http.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "git-widget-placeholder": "main",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "configurable.group.build",
+    "vue.rearranger.settings.migration": "true"
   },
-  &quot;keyToStringList&quot;: {
-    &quot;rider.external.source.directories&quot;: [
-      &quot;/Users/leonlin/Library/Application Support/JetBrains/Rider2024.1/resharper-host/DecompilerCache&quot;,
-      &quot;/Users/leonlin/Library/Application Support/JetBrains/Rider2024.1/resharper-host/SourcesCache&quot;,
-      &quot;/Users/leonlin/Library/Application Support/Symbols/src&quot;
+  "keyToStringList": {
+    "rider.external.source.directories": [
+      "/Users/leonlin/Library/Application Support/JetBrains/Rider2024.1/resharper-host/DecompilerCache",
+      "/Users/leonlin/Library/Application Support/JetBrains/Rider2024.1/resharper-host/SourcesCache",
+      "/Users/leonlin/Library/Application Support/Symbols/src"
     ]
   }
-}</component>
+}]]></component>
   <component name="RunManager" selected=".NET Launch Settings Profile.ChatProtocolBackend: http">
     <configuration name="ChatProtocolBackend: http" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/ChatProtocolBackend.csproj" />
@@ -103,12 +132,15 @@
       <workItem from="1719292206427" duration="222000" />
       <workItem from="1719292590910" duration="552000" />
       <workItem from="1719293151059" duration="97000" />
+      <workItem from="1719296899305" duration="634000" />
+      <workItem from="1719308869090" duration="16227000" />
     </task>
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
   <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />

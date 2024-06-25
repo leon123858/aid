@@ -11,11 +11,12 @@ import (
 	"aid-server/services/mlm"
 	"aid-server/services/rba"
 	"aid-server/services/user"
+	"fmt"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 )
 
-var IDMapPoint *idmap.IDMap
+var UIDMapAID *idmap.IDMap
 var RecordCache mlm.MultiLevelMap
 
 func init() {
@@ -26,7 +27,7 @@ func init() {
 	if UserMapDB, err = ldb.NewDB(configs.Configs.Path.IDMap); err != nil {
 		panic(err)
 	}
-	IDMapPoint = idmap.NewIDMap(100, UserMapDB)
+	UIDMapAID = idmap.NewIDMap(100, UserMapDB)
 	RecordCache = mlm.NewMultiLevelMap()
 }
 
@@ -152,7 +153,7 @@ func register(c echo.Context) error {
 }
 
 // @Summary		Ask
-// @Description	service ask aid server to get unique id(uuid) for user in service
+// @Description	service ask aid server to get new unique id(uuid) for user in service
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
@@ -175,6 +176,7 @@ func ask(c echo.Context) error {
 		return c.JSON(400, res.GenerateResponse(false, err.Error()))
 	}
 	if len(get) != 1 {
+		fmt.Printf("get: %v\n", get)
 		return c.JSON(400, res.GenerateResponse(false, "can not get unique aid"))
 	}
 	aidUUID := get[0]
@@ -186,14 +188,14 @@ func ask(c echo.Context) error {
 		return c.JSON(400, res.GenerateResponse(false, "user not existed"))
 	}
 	uid := uuid.New().String()
-	if err := IDMapPoint.Set(uid, aidUUID.String()); err != nil {
+	if err := UIDMapAID.Set(uid, aidUUID.String()); err != nil {
 		return c.JSON(500, res.GenerateResponse(false, "id map set failed"))
 	}
 	return c.JSON(200, res.GenerateResponse(true, uid))
 }
 
 // @Summary		Check
-// @Description	given uid, check the service to check user status, maybe ask user should login again in aid server
+// @Description	given uid, check the service to check user status, maybe ask user should log in again in aid server
 // @Tags			Auth
 // @Accept			json
 // @Produce		json
@@ -208,7 +210,7 @@ func check(c echo.Context) error {
 	if req.IP == "" {
 		req.IP = c.RealIP()
 	}
-	aid, err := IDMapPoint.Get(req.UID)
+	aid, err := UIDMapAID.Get(req.UID)
 	if err != nil || aid == "" {
 		return c.JSON(400, res.GenerateResponse(false, "invalid uid"))
 	}
@@ -258,7 +260,7 @@ func verify(c echo.Context) error {
 	if !ok {
 		return c.JSON(400, res.GenerateResponse(false, "invalid claims"))
 	}
-	aid, err := IDMapPoint.Get(req.UID)
+	aid, err := UIDMapAID.Get(req.UID)
 	if err != nil || aid == "" {
 		return c.JSON(400, res.GenerateResponse(false, "invalid uid"))
 	}

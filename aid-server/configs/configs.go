@@ -29,7 +29,7 @@ func init() {
 	Configs.Host.Host = "0.0.0.0"
 	Configs.Host.Port = "8080"
 	Configs.Jwt.Secret = "test"
-	Configs.Jwt.Duration = time.Hour
+	Configs.Jwt.Duration = time.Minute * 1
 	Configs.Path.UserDB = "data/user.db"
 	Configs.Path.IDMap = "data/idmap.db"
 	Configs.Time.LoginCache = time.Minute * 1

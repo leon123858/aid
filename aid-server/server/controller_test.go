@@ -225,7 +225,7 @@ func TestCheck(t *testing.T) {
 	}
 
 	// check uid map aid
-	aidM, err := IDMapPoint.Get(uid)
+	aidM, err := UIDMapAID.Get(uid)
 	assert.NoError(t, err)
 	assert.Equal(t, aid.String(), aidM)
 
