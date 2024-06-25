@@ -23,3 +23,32 @@ My goal is apply aid implementation to this project.
 3. In one terminal, navigate to the `backend/charp` directory.
 4. run `bash ./startup.sh` to start the backend server.
 5. you should paste your OpenAI API Key in the terminal.
+
+## Demo Script
+
+this step depend on local ip setting
+- wallet/lib/constants/config.dart
+- demo/frontend/js/react/vite.config.ts
+- demo/backend/csharp/Services/AID.cs
+
+1. Open App in MacOS
+    ```bash
+    cd ./wallet/build/macos/Build/Products/Release
+    # use `open` to open the app
+    open wallet.app
+    ```
+2. Open App in Browser
+    ```bash
+    cd ./demo/frontend/js/react
+    npm run dev
+    ```
+3. Open aid server
+    ```bash
+    cd ./aid-server
+    make
+    ```
+4. Open App backend server
+    ```bash
+    cd ./demo/backend/charp
+    bash ./startup.sh
+    ```
