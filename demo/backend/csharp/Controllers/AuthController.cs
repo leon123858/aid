@@ -39,22 +39,36 @@ public class AuthController : ControllerBase
                     {
                         foreach (var uid in uidList)
                         {
-                            var res = await service.verify(request.Token, uid);
-                            if (res.result)
+                            try
                             {
-                                onlineList.Add(uid);
+                                var res = await service.verify(request.Token, uid);
+                                if (res.result)
+                                {
+                                    onlineList.Add(uid);
+                                }
                             }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine(e.Message);
+                            }
+
                         }
                     }
                     else
                     {
                         foreach (var uid in uidList)
                         {
-                            var res = await service.check(uid, request.IP, request.fingerprint);
-                            Console.WriteLine(res.result + "/" + res.content);
-                            if (res.result & res.content == "online")
+                            try
                             {
-                                onlineList.Add(uid);
+                                var res = await service.check(uid, request.IP, request.fingerprint);
+                                Console.WriteLine(res.result + "/" + res.content);
+                                if (res.result & res.content == "online")
+                                {
+                                    onlineList.Add(uid);
+                                }
+                            } catch (Exception e)
+                            {
+                                Console.WriteLine(e.Message);
                             }
                         }
                     }

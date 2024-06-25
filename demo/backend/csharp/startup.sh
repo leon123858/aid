@@ -4,8 +4,8 @@ cd backend/csharp
 
 # Set environment variables
 #read -p "Use Azure OpenAI? (true/false): " UseAzureOpenAI
-#export UseAzureOpenAI
-
+UseAzureOpenAI=false
+export UseAzureOpenAI
 #if [ "$UseAzureOpenAI" = "true" ]; then
 #    read -p "Enter Azure Deployment: " AzureDeployment
 #    read -p "Enter Azure Endpoint: " AzureEndpoint
@@ -16,7 +16,7 @@ cd backend/csharp
 #else
 read -p "Enter OpenAI API Key (default is <fake key>): " APIKey
 read -p "Enter OpenAI Model (default is gpt-3.5-turbo): " Model
-APIKey=${APIKey:-fake-key}
+APIKey=${APIKey:-<fake key>}
 Model=${Model:-gpt-3.5-turbo}
 export APIKey
 export Model

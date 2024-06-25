@@ -49,6 +49,6 @@ this step depend on local ip setting
     ```
 4. Open App backend server
     ```bash
-    cd ./demo/backend/charp
+    cd ./demo/backend/csharp
     bash ./startup.sh
     ```
