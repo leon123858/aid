@@ -9,32 +9,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="250c85b1-21a5-42de-ad2a-521f7bcc49e8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/Controllers/AuthController.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Model/AIAuthRequest.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Model/AIAuthResponse.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Services/AID.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/Services/Users.cs" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Auth.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Provider.tsx" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../frontend/js/react/src/utils/apiWrapper.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../../frontend/js/react/src/utils/deviceFingerprinter.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../aid-server/server/controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/../../../aid-server/server/controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../aid-server/server/controller_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/../../../aid-server/server/controller_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../aid-server/services/mlm/map.go" beforeDir="false" afterPath="$PROJECT_DIR$/../../../aid-server/services/mlm/map.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.csharp.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.csharp.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ChatProtocolBackend.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ChatProtocolBackend.csproj" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Controllers/ChatController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/ChatController.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/startup.sh" beforeDir="false" afterPath="$PROJECT_DIR$/startup.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/App.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/App.module.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/App.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.module.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/Readme.tsx" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/assets/caution.svg" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/assets/caution.svg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/main.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/tsconfig.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/tsconfig.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../../../wallet/lib/constants/config.dart" beforeDir="false" afterPath="$PROJECT_DIR$/../../../wallet/lib/constants/config.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -133,7 +108,7 @@
       <workItem from="1719292590910" duration="552000" />
       <workItem from="1719293151059" duration="97000" />
       <workItem from="1719296899305" duration="634000" />
-      <workItem from="1719308869090" duration="16227000" />
+      <workItem from="1719308869090" duration="17182000" />
     </task>
     <servers />
   </component>
