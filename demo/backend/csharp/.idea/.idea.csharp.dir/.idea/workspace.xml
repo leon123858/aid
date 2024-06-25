@@ -9,9 +9,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="250c85b1-21a5-42de-ad2a-521f7bcc49e8" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.dockerignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Dockerfile" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../frontend/js/react/.dockerignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../../frontend/js/react/Dockerfile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/.idea.csharp.dir/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.csharp.dir/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Controllers/AuthController.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Controllers/AuthController.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ChatProtocolBackend.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/ChatProtocolBackend.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/App.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/App.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/Auth.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Auth.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.module.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Chat.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/Provider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/Provider.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/main.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/utils/apiWrapper.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/utils/apiWrapper.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../frontend/js/react/src/utils/deviceFingerprinter.ts" beforeDir="false" afterPath="$PROJECT_DIR$/../../frontend/js/react/src/utils/deviceFingerprinter.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +50,10 @@
   <component name="HighlightingSettingsPerFile">
     <setting file="mock:///Users/leonlin/Desktop/git/aid/demo/backend/csharp/Program.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
+  <component name="KubernetesApiPersistence">{}</component>
+  <component name="KubernetesApiProvider">{
+  &quot;isMigrated&quot;: true
+}</component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 5
@@ -45,27 +63,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    ".NET Launch Settings Profile.ChatProtocolBackend: http.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "main",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "configurable.group.build",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;.NET Launch Settings Profile.ChatProtocolBackend: http.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;configurable.group.build&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   },
-  "keyToStringList": {
-    "rider.external.source.directories": [
-      "/Users/leonlin/Library/Application Support/JetBrains/Rider2024.1/resharper-host/DecompilerCache",
-      "/Users/leonlin/Library/Application Support/JetBrains/Rider2024.1/resharper-host/SourcesCache",
-      "/Users/leonlin/Library/Application Support/Symbols/src"
+  &quot;keyToStringList&quot;: {
+    &quot;rider.external.source.directories&quot;: [
+      &quot;/Users/leonlin/Library/Application Support/JetBrains/Rider2024.1/resharper-host/DecompilerCache&quot;,
+      &quot;/Users/leonlin/Library/Application Support/JetBrains/Rider2024.1/resharper-host/SourcesCache&quot;,
+      &quot;/Users/leonlin/Library/Application Support/Symbols/src&quot;
     ]
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected=".NET Launch Settings Profile.ChatProtocolBackend: http">
     <configuration name="ChatProtocolBackend: http" type="LaunchSettings" factoryName=".NET Launch Settings Profile">
       <option name="LAUNCH_PROFILE_PROJECT_FILE_PATH" value="$PROJECT_DIR$/ChatProtocolBackend.csproj" />
@@ -97,6 +115,34 @@
         <option name="Build" />
       </method>
     </configuration>
+    <configuration name="Dockerfile" type="docker-deploy" factoryName="dockerfile" server-name="Docker">
+      <deployment type="dockerfile">
+        <settings>
+          <option name="imageTag" value="chatprotocolbackend" />
+          <option name="containerName" value="chatprotocolbackend" />
+          <option name="contextFolderPath" value="$PROJECT_DIR$" />
+          <option name="portBindings">
+            <list>
+              <DockerPortBindingImpl>
+                <option name="containerPort" value="80" />
+                <option name="hostIp" value="127.0.0.1" />
+                <option name="hostPort" value="8080" />
+              </DockerPortBindingImpl>
+            </list>
+          </option>
+          <option name="sourceFilePath" value="Dockerfile" />
+        </settings>
+      </deployment>
+      <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="true" isSslEnabled="false" />
+      <method v="2" />
+    </configuration>
+    <configuration default="true" type="docker-deploy" factoryName="dockerfile" temporary="true">
+      <deployment type="dockerfile">
+        <settings />
+      </deployment>
+      <EXTENSION ID="com.jetbrains.rider.docker.debug" isFastModeEnabled="true" isSslEnabled="false" />
+      <method v="2" />
+    </configuration>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -110,7 +156,8 @@
       <workItem from="1719292590910" duration="552000" />
       <workItem from="1719293151059" duration="97000" />
       <workItem from="1719296899305" duration="634000" />
-      <workItem from="1719308869090" duration="17871000" />
+      <workItem from="1719308869090" duration="20153000" />
+      <workItem from="1719338640857" duration="1018000" />
     </task>
     <servers />
   </component>
