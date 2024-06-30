@@ -17,7 +17,7 @@ var rootCmd = &cobra.Command{
 
 var serverCmd = &cobra.Command{
 	Use:   "server",
-	Short: "Start the AID web server",
+	Short: "Start the AID web server with single server",
 	Long:  "Start the AID web server and handle incoming requests.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		ln, err := net.Listen("tcp", net.JoinHostPort(configs.Configs.Host.Host, configs.Configs.Host.Port))
@@ -28,8 +28,18 @@ var serverCmd = &cobra.Command{
 	},
 }
 
+var blockChainCmd = &cobra.Command{
+	Use:   "blockchain",
+	Short: "Start the AID web server with blockchain",
+	Long:  "Start the blockchain server and handle incoming requests.",
+	RunE: func(cmd *cobra.Command, args []string) error {
+		panic("not implemented")
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(serverCmd)
+	rootCmd.AddCommand(blockChainCmd)
 }
 
 func serve(listener net.Listener, serveFunc func(ln net.Listener) error) error {
@@ -37,7 +47,6 @@ func serve(listener net.Listener, serveFunc func(ln net.Listener) error) error {
 	if errors.Is(err, http.ErrServerClosed) {
 		return nil
 	}
-
 	return err
 }
 
