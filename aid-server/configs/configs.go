@@ -17,8 +17,9 @@ var Configs = struct {
 		time.Duration
 	}
 	Path struct {
-		UserDB string
-		IDMap  string
+		UserDB  string
+		IDMap   string
+		AliasDB string
 	}
 	Time struct {
 		LoginCache time.Duration
@@ -32,6 +33,7 @@ func init() {
 	Configs.Jwt.Duration = time.Minute * 1
 	Configs.Path.UserDB = "data/user.db"
 	Configs.Path.IDMap = "data/idmap.db"
+	Configs.Path.AliasDB = "data/alias.db"
 	Configs.Time.LoginCache = time.Minute * 1
 	err := godotenv.Load()
 	if err != nil {
@@ -44,5 +46,6 @@ func init() {
 	Configs.Jwt.Duration, _ = time.ParseDuration(os.Getenv("JWT_DURATION"))
 	Configs.Path.UserDB = os.Getenv("USER_DB")
 	Configs.Path.IDMap = os.Getenv("ID_MAP")
+	Configs.Path.AliasDB = os.Getenv("ALIAS_DB")
 	Configs.Time.LoginCache, _ = time.ParseDuration(os.Getenv("LOGIN_CACHE"))
 }

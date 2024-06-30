@@ -7,7 +7,9 @@ import (
 	"aid-server/pkg/res"
 	"aid-server/pkg/rsa"
 	"aid-server/pkg/timestamp"
+	"aid-server/services/alias"
 	"aid-server/services/idmap"
+	"aid-server/services/localAPIWrapper"
 	"aid-server/services/mlm"
 	"aid-server/services/rba"
 	"aid-server/services/user"
@@ -18,6 +20,7 @@ import (
 
 var UIDMapAID *idmap.IDMap
 var RecordCache mlm.MultiLevelMap
+var AliasPool *alias.DB
 
 func init() {
 	var err error
@@ -25,6 +28,9 @@ func init() {
 		panic(err)
 	}
 	if UserMapDB, err = ldb.NewDB(configs.Configs.Path.IDMap); err != nil {
+		panic(err)
+	}
+	if AliasPool, err = alias.NewDB(configs.Configs.Path.AliasDB); err != nil {
 		panic(err)
 	}
 	UIDMapAID = idmap.NewIDMap(100, UserMapDB)
@@ -268,4 +274,148 @@ func verify(c echo.Context) error {
 		return c.JSON(400, res.GenerateResponse(false, "token not match uid"))
 	}
 	return c.JSON(200, res.GenerateResponse(true, "token match uid"))
+}
+
+// @Summary		Alias Login
+// @Description	Alias Login for usage
+// @Tags			Usage
+// @Accept			json
+// @Produce		json
+// @Param			req	body		localAPIWrapper.UsageRequest	true	"Usage Request"
+// @Success		200	{object}	localAPIWrapper.UsageResponse
+// @Router			/usage/login [post]
+func loginAlias(c echo.Context) error {
+	req := localAPIWrapper.UsageRequest{}
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(400, localAPIWrapper.UsageResponse{
+			Result:  false,
+			Message: "invalid request body",
+		})
+	}
+	onlineList := make([]string, 0)
+	wrapper := localAPIWrapper.New()
+	aliasList, err := AliasPool.ValidateUser(req.Username, req.Password)
+	if err != nil {
+		return c.JSON(500, localAPIWrapper.UsageResponse{
+			Result:  false,
+			Message: err.Error(),
+		})
+	}
+	if len(aliasList) == 0 {
+		return c.JSON(400, localAPIWrapper.UsageResponse{
+			Result:  false,
+			Message: "invalid username or password",
+		})
+	}
+	if len(aliasList) == 1 {
+		// get pre login
+		info, err := AliasPool.GetUserLoginHistory(aliasList[0])
+		if err != nil {
+			return c.JSON(500, localAPIWrapper.UsageResponse{
+				Result:  false,
+				Message: err.Error(),
+			})
+		}
+		if info == nil {
+			goto verify
+		}
+		// check if pre login record is same as current login
+		if info.IP != req.IP || info.Browser != req.Fingerprint {
+			return c.JSON(400, localAPIWrapper.UsageResponse{
+				Result:  false,
+				Message: "pre login not match",
+			})
+		}
+		goto success
+	}
+verify:
+	if req.Token != "" {
+		for _, v := range aliasList {
+			result, err := wrapper.Verify(req.Token, v)
+			if err != nil {
+				// do nothing, just skip
+				continue
+			}
+			if result.Result {
+				onlineList = append(onlineList, v)
+			}
+		}
+	} else {
+		for _, v := range aliasList {
+			result, err := wrapper.Check(v, req.IP, req.Fingerprint)
+			if err != nil {
+				// do nothing, just skip
+				continue
+			}
+			if result.Result && result.Content == "online" {
+				onlineList = append(onlineList, v)
+			}
+		}
+	}
+	if len(onlineList) == 0 {
+		return c.JSON(400, localAPIWrapper.UsageResponse{
+			Result:  false,
+			Message: "no online alias",
+		})
+	}
+	if len(onlineList) > 1 {
+		return c.JSON(400, localAPIWrapper.UsageResponse{
+			Result:  false,
+			Message: "multiple online alias",
+		})
+	}
+	aliasList = onlineList
+success:
+	//println(aliasList[0], req.IP, req.Fingerprint)
+	if err := AliasPool.AddLoginRecord(aliasList[0], req.IP, req.Fingerprint); err != nil {
+		return c.JSON(500, localAPIWrapper.UsageResponse{
+			Result:  false,
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(200, localAPIWrapper.UsageResponse{
+		Token:   "",
+		UUID:    aliasList[0],
+		Message: "Successfully login",
+		Result:  true,
+	})
+}
+
+// @Summary		Alias Register
+// @Description	Alias Register for usage
+// @Tags			Usage
+// @Accept			json
+// @Produce		json
+// @Param			req	body		localAPIWrapper.UsageRequest	true	"Usage Request"
+// @Success		200	{object}	localAPIWrapper.UsageResponse
+// @Router			/usage/register [post]
+func registerAlias(c echo.Context) error {
+	req := localAPIWrapper.UsageRequest{}
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(400, localAPIWrapper.UsageResponse{
+			Result:  false,
+			Message: "invalid request body",
+		})
+	}
+	wrapper := localAPIWrapper.New()
+	result, err := wrapper.Ask(req.IP, req.Fingerprint)
+	if err != nil {
+		return c.JSON(500, localAPIWrapper.UsageResponse{
+			Result:  false,
+			Message: err.Error(),
+		})
+	}
+	uid := result.Content
+	if err := AliasPool.AddUser(uid, req.Username, req.Password); err != nil {
+		return c.JSON(500, localAPIWrapper.UsageResponse{
+			Result:  false,
+			Message: err.Error(),
+		})
+	}
+	return c.JSON(200, localAPIWrapper.UsageResponse{
+		Token:   "",
+		UUID:    uid,
+		Message: "Successfully registered",
+		Result:  true,
+	})
 }
