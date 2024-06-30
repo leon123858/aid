@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  app:
+    image: leon1234858/aid-server:latest
+    environment:
+      - GO_ENV=release
+      - TZ=Asia/Taipei
+    expose:
+      - 8080
+
+  nginx:
+    image: nginx:latest
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - app

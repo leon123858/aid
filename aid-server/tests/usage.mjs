@@ -1,8 +1,9 @@
-import { execSync, spawn } from 'child_process';
+import {execSync, spawn} from 'child_process';
 import assert from 'assert';
 import crypto from 'crypto';
 
 const serverUrl = 'http://127.0.0.1:8080';
+// const serverUrl = 'http://20.2.209.109';
 let serverProcess;
 let userName, publicKey, privateKey, aid;
 
@@ -20,24 +21,24 @@ const stopServer = () => {
 const generateRSAKeyPair = () => {
     return crypto.generateKeyPairSync('rsa', {
         modulusLength: 2048,
-        publicKeyEncoding: { type: 'spki', format: 'pem' },
-        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+        publicKeyEncoding: {type: 'spki', format: 'pem'},
+        privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
     });
 };
 
 const makeRequest = async (endpoint, method, body) => {
     const response = await fetch(`${serverUrl}${endpoint}`, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(body),
     });
-    return { response, data: await response.json() };
+    return {response, data: await response.json()};
 };
 
 const addUser = async () => {
-    const { privateKey: privKey, publicKey: pubKey } = generateRSAKeyPair();
+    const {privateKey: privKey, publicKey: pubKey} = generateRSAKeyPair();
     aid = crypto.randomUUID();
-    const { response, data } = await makeRequest('/api/register', 'POST', {
+    const {response, data} = await makeRequest('/api/register', 'POST', {
         aid,
         publicKey: pubKey,
         ip: '127.0.2.1',
@@ -57,7 +58,7 @@ const testLogin = async (fingerprint = 'Chrome') => {
         key: privateKey,
         padding: crypto.constants.RSA_PKCS1_PADDING,
     });
-    const { response, data } = await makeRequest('/api/login', 'POST', {
+    const {response, data} = await makeRequest('/api/login', 'POST', {
         aid,
         sign: sign.toString('base64'),
         timestamp,
@@ -72,7 +73,7 @@ const testLogin = async (fingerprint = 'Chrome') => {
 
 const testRegisterAlias = async (fingerprint = 'Chrome') => {
     console.log('Testing Register Alias...');
-    const { response, data } = await makeRequest('/usage/register', 'POST', {
+    const {response, data} = await makeRequest('/usage/register', 'POST', {
         username: userName,
         password: 'testpass',
         ip: '127.0.2.1',
@@ -86,13 +87,13 @@ const testRegisterAlias = async (fingerprint = 'Chrome') => {
 
 const testLoginAlias = async (scenario, ip, fingerprint = 'Chrome') => {
     console.log(`Testing Login Alias - ${scenario}...`);
-    const { response, data } = await makeRequest('/usage/login', 'POST', {
+    const {response, data} = await makeRequest('/usage/login', 'POST', {
         username: userName,
         password: 'testpass',
         ip,
         fingerprint,
     });
-    return { response, data };
+    return {response, data};
 };
 
 const MFALogin = async (fingerprint = 'Chrome') => {
@@ -101,7 +102,7 @@ const MFALogin = async (fingerprint = 'Chrome') => {
         key: privateKey,
         padding: crypto.constants.RSA_PKCS1_PADDING,
     });
-    const { response, data } = await makeRequest('/api/login', 'POST', {
+    const {response, data} = await makeRequest('/api/login', 'POST', {
         aid,
         sign: sign.toString('base64'),
         timestamp,

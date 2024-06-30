@@ -35,7 +35,7 @@ build:
 
 build-linux:
 	go mod tidy
-	CGO_ENABLED=0 GOOS=linux go build -o ./bin/aid ./main.go
+	CGO_ENABLED=1 GOOS=linux go build -o ./bin/aid ./main.go
 
 docker-build:
 	docker buildx build -t aid -f ./Dockerfile --platform linux/amd64 .
@@ -43,10 +43,8 @@ docker-build:
 	docker push leon1234858/aid-server:latest
 
 deploy:
-	docker rm aid-server
-	docker rmi leon1234858/aid-server:latest
-	docker pull leon1234858/aid-server:latest
-	docker run -d --name aid-server -p 8080:8080 leon1234858/aid-server:latest
+	echo "create directory ./SSL and put your SSL certificate and key in it..."
+	sudo docker-compose up -d
 
 clean:
 	rm -rf ./bin

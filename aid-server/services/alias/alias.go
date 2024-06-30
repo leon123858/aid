@@ -22,7 +22,7 @@ func NewDB(dbPath string) (*DB, error) {
 
 	udb := &DB{db: db}
 	if err := udb.initialize(); err != nil {
-		panic("alias db init error")
+		panic(err.Error())
 	}
 
 	return udb, nil

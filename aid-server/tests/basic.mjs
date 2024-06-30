@@ -1,4 +1,4 @@
-import { execSync, spawn } from 'child_process';
+import {execSync, spawn} from 'child_process';
 import crypto from 'crypto';
 import assert from 'assert';
 
@@ -21,17 +21,17 @@ const stopServer = () => {
 const generateRSAKeyPair = () => {
     return crypto.generateKeyPairSync('rsa', {
         modulusLength: 2048,
-        publicKeyEncoding: { type: 'spki', format: 'pem' },
-        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+        publicKeyEncoding: {type: 'spki', format: 'pem'},
+        privateKeyEncoding: {type: 'pkcs8', format: 'pem'},
     });
 };
 
 const addUser = async () => {
-    const { privateKey: privKey, publicKey: pubKey } = generateRSAKeyPair();
+    const {privateKey: privKey, publicKey: pubKey} = generateRSAKeyPair();
     aid = crypto.randomUUID();
     const response = await fetch(`${serverUrl}/api/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
             aid: aid,
             publicKey: pubKey,
@@ -48,10 +48,10 @@ const addUser = async () => {
 
 async function testRegister() {
     console.log('Testing Register...');
-    const { publicKey } = generateRSAKeyPair();
+    const {publicKey} = generateRSAKeyPair();
     const response = await fetch(`${serverUrl}/api/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
             aid: crypto.randomUUID(),
             publicKey: publicKey,
@@ -69,7 +69,7 @@ async function testRegisterWithInvalidPublicKey() {
     console.log('Testing Register with invalid public key...');
     const response = await fetch(`${serverUrl}/api/register`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
             aid: crypto.randomUUID(),
             publicKey: 'invalid public key',
@@ -95,7 +95,7 @@ async function testLogin() {
     });
     const response = await fetch(`${serverUrl}/api/login`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
             aid: aid,
             sign: sign.toString('base64'),
@@ -135,7 +135,7 @@ async function testCheckOnline(uid) {
     console.log('Testing Check - Online...');
     const response = await fetch(`${serverUrl}/api/check`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
             uid: uid,
             ip: '127.0.1.3',
@@ -152,7 +152,7 @@ async function testCheckOffline(uid) {
     console.log('Testing Check - Offline...');
     const response = await fetch(`${serverUrl}/api/check`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
             uid: uid,
             ip: '127.0.1.3',
