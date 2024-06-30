@@ -35,5 +35,5 @@ func CheckTimestampClose(t1, t2 Timestamp, number float64) bool {
 }
 
 func CheckTimestampClose5000(t1, t2 Timestamp) bool {
-	return CheckTimestampClose(t1, t2, 5000)
+	return CheckTimestampClose(t1, t2, 50000)
 }

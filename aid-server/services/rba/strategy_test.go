@@ -74,7 +74,7 @@ func TestSimpleStrategy_Verify(t *testing.T) {
 			name: "Invalid time",
 			input: &user.Record{
 				Time: user.Time{
-					CurEventTime: timestamp.GetTime() + 6000,
+					CurEventTime: timestamp.GetTime() + 60000,
 				},
 				Space: user.Space{DeviceFingerPrint: user.DeviceFingerPrint{
 					IP:   "127.0.0.1",

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:crypton/crypton.dart';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:uuid/uuid.dart';
 import 'package:wallet/constants/config.dart';
@@ -12,10 +13,12 @@ class AIDApiClient {
   final uuid = const Uuid();
   final http.Client _httpClient = http.Client();
   final _deviceInfo = DeviceInfo();
+  var _deviceIP = '';
 
   var _isInit = false;
 
   String get deviceInfoHash => _deviceInfo.deviceHash;
+  String get deviceIP => _deviceIP;
 
   AIDApiClient({this.baseUrl = 'http://127.0.0.1:8080'});
 
@@ -24,6 +27,20 @@ class AIDApiClient {
       return;
     }
     await _deviceInfo.initPlatformState();
+    final response = await http.get(Uri.parse('https://api.ipify.org?format=json'));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      _deviceIP = data['ip'];
+      if (kDebugMode) {
+        print('IP address: $_deviceIP');
+      }
+    } else {
+      // warn user
+      if (kDebugMode) {
+        print('Failed to get IP address');
+      }
+      _deviceIP = '';
+    }
     _isInit = true;
   }
 
@@ -42,7 +59,7 @@ class AIDApiClient {
       body: json.encode({
         'aid': aid,
         'browser': _deviceInfo.deviceHash,
-        'ip': "",
+        'ip': _deviceIP,
         'sign': b64Sign,
         'timestamp': timestamp,
       }),
@@ -58,8 +75,38 @@ class AIDApiClient {
       body: json.encode({
         'aid': aid,
         'browser': _deviceInfo.deviceHash,
-        'ip': "",
+        'ip': _deviceIP,
         'publicKey': RSAUtils.encodePublicKeyToPem(publicKey),
+      }),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> signup(String alias, String pin) async {
+    final response = await _httpClient.post(
+      Uri.parse('$baseUrl/usage/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        "fingerprint": _deviceInfo.deviceHash,
+        "ip": _deviceIP,
+        "password": pin,
+        "token": "",
+        "username": alias
+      }),
+    );
+    return _handleResponse(response);
+  }
+
+  Future<Map<String, dynamic>> signIn(String alias, String pin, String? token) async {
+    final response = await _httpClient.post(
+      Uri.parse('$baseUrl/usage/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        "fingerprint": _deviceInfo.deviceHash,
+        "ip": _deviceIP,
+        "password": pin,
+        "token": token ?? "",
+        "username": alias
       }),
     );
     return _handleResponse(response);

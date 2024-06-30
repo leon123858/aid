@@ -1,3 +1,3 @@
 const documentUrl = 'https://github.com/leon123858/aid';
-// const serverUrl = "http://20.2.209.109";
-const serverUrl = "http://localhost:8080";
+const serverUrl = "https://lab408.tech";
+// const serverUrl = "http://localhost:8080";

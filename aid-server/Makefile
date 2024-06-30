@@ -43,7 +43,7 @@ docker-build:
 	docker push leon1234858/aid-server:latest
 
 deploy:
-	echo "create directory ./SSL and put your SSL certificate and key in it..."
+	echo "create directory ./ssl and put your SSL certificate and key in it..."
 	sudo docker-compose up -d
 
 clean:

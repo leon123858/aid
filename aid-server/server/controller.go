@@ -321,10 +321,7 @@ func loginAlias(c echo.Context) error {
 		}
 		// check if pre login record is same as current login
 		if info.IP != req.IP || info.Browser != req.Fingerprint {
-			return c.JSON(400, localAPIWrapper.UsageResponse{
-				Result:  false,
-				Message: "pre login not match",
-			})
+			goto verify
 		}
 		goto success
 	}
@@ -333,7 +330,7 @@ verify:
 		for _, v := range aliasList {
 			result, err := wrapper.Verify(req.Token, v)
 			if err != nil {
-				// do nothing, just skip
+				fmt.Printf("Verify: %s\n", err.Error())
 				continue
 			}
 			if result.Result {
@@ -344,7 +341,7 @@ verify:
 		for _, v := range aliasList {
 			result, err := wrapper.Check(v, req.IP, req.Fingerprint)
 			if err != nil {
-				// do nothing, just skip
+				fmt.Printf("Check: %s\n", err.Error())
 				continue
 			}
 			if result.Result && result.Content == "online" {

@@ -89,7 +89,7 @@ Consumer<AIDListModel> aidListView() {
                               await copyWriteString(response['content']);
                               if (context.mounted) {
                                 showSuccessToast(
-                                    context, 'copy success: 限制時間內有效');
+                                    context, 'MFA token: 限制時間內有效');
                               }
                             } else {
                               throw Exception(response['content']);

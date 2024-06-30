@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wallet/components/LoginRegisterDialog.dart';
 import 'package:wallet/components/msg.dart';
 import 'package:wallet/constants/config.dart';
 import 'package:wallet/utils/apiWrapper.dart';
@@ -132,6 +133,21 @@ Drawer walletDrawer(BuildContext context) {
               ),
               child: const Text('Documentation',
                   style: TextStyle(color: Colors.grey)),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: ElevatedButton(
+              onPressed: () async {
+                showDialog(
+                    context: context,
+                    builder: (context) => const LoginRegisterDialog());
+              },
+              style: ElevatedButton.styleFrom(
+                minimumSize: const Size(double.infinity, 40),
+              ),
+              child:
+                  const Text('Demo Page', style: TextStyle(color: Colors.grey)),
             ),
           ),
         ],
