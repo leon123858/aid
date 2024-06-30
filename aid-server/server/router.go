@@ -38,7 +38,6 @@ func generateRouter() *echo.Echo {
 		return c.String(200, "OK")
 	})
 
-	// Add your routes here
 	api := router.Group("/api")
 	{
 		api.Use(device.SetRealIP)
@@ -47,6 +46,12 @@ func generateRouter() *echo.Echo {
 		api.POST("/ask", ask)
 		api.POST("/check", check)
 		api.POST("/verify", verify, jwt.GenerateParseJwtMiddle(res.GenerateResponse))
+	}
+
+	usage := router.Group("/usage")
+	{
+		usage.POST("/login", loginAlias)
+		usage.POST("/register", registerAlias)
 	}
 
 	return router

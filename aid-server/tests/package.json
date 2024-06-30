@@ -4,7 +4,7 @@
   "description": "test aid server",
   "main": "index.js",
   "scripts": {
-    "test": "node basic.mjs"
+    "test": "node basic.mjs && node usage.mjs"
   },
   "type": "module",
   "author": "Leon Lin",
