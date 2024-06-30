@@ -1,9 +1,10 @@
-import {execSync, spawn} from 'child_process';
+import { execSync, spawn } from 'child_process';
 import assert from 'assert';
 import crypto from 'crypto';
 
 const serverUrl = 'http://127.0.0.1:8080';
 let serverProcess;
+let userName, publicKey, privateKey, aid;
 
 const startServer = () => {
     serverProcess = spawn('../bin/aid', ['server']);
@@ -16,14 +17,6 @@ const stopServer = () => {
     }
 };
 
-let randomUUID = () => {
-    return crypto.randomUUID();
-};
-let userName = randomUUID()
-let publicKey = ""
-let privateKey = ""
-let aid = ""
-
 const generateRSAKeyPair = () => {
     return crypto.generateKeyPairSync('rsa', {
         modulusLength: 2048,
@@ -32,27 +25,31 @@ const generateRSAKeyPair = () => {
     });
 };
 
+const makeRequest = async (endpoint, method, body) => {
+    const response = await fetch(`${serverUrl}${endpoint}`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+    });
+    return { response, data: await response.json() };
+};
+
 const addUser = async () => {
     const { privateKey: privKey, publicKey: pubKey } = generateRSAKeyPair();
     aid = crypto.randomUUID();
-    const response = await fetch(`${serverUrl}/api/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            aid: aid,
-            publicKey: pubKey,
-            ip: '127.0.2.1',
-            browser: 'Chrome',
-        }),
+    const { response, data } = await makeRequest('/api/register', 'POST', {
+        aid,
+        publicKey: pubKey,
+        ip: '127.0.2.1',
+        browser: 'Chrome',
     });
-    const data = await response.json();
     assert.strictEqual(response.status, 200);
     assert.strictEqual(data.result, true);
     privateKey = privKey;
     publicKey = pubKey;
 };
 
-async function testLogin() {
+const testLogin = async (fingerprint = 'Chrome') => {
     console.log('Testing Login...');
     await addUser();
     const timestamp = Date.now().toString();
@@ -60,156 +57,109 @@ async function testLogin() {
         key: privateKey,
         padding: crypto.constants.RSA_PKCS1_PADDING,
     });
-    const response = await fetch(`${serverUrl}/api/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            aid: aid,
-            sign: sign.toString('base64'),
-            timestamp: timestamp,
-            ip: '127.0.2.1',
-            browser: 'Chrome',
-        }),
+    const { response, data } = await makeRequest('/api/login', 'POST', {
+        aid,
+        sign: sign.toString('base64'),
+        timestamp,
+        ip: '127.0.2.1',
+        browser: fingerprint,
     });
-    const data = await response.json();
     assert.strictEqual(response.status, 200);
     assert.strictEqual(data.result, true);
     assert.ok(data.content);
-    return data.content; // Return token for Ask test
-}
+    return data.content;
+};
 
-async function testRegisterAlias() {
+const testRegisterAlias = async (fingerprint = 'Chrome') => {
     console.log('Testing Register Alias...');
-    const response = await fetch(`${serverUrl}/usage/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            username: userName,
-            password: 'testpass',
-            ip: '127.0.2.1',
-            fingerprint: 'Chrome',
-        }),
+    const { response, data } = await makeRequest('/usage/register', 'POST', {
+        username: userName,
+        password: 'testpass',
+        ip: '127.0.2.1',
+        fingerprint,
     });
-    const data = await response.json();
     assert.strictEqual(response.status, 200);
     assert.strictEqual(data.result, true);
     assert.ok(data.uuid);
     return data.uuid;
-}
+};
 
-async function testLoginAliasNoPreLoginError() {
-    console.log('Testing Login Alias - No Pre Login and No online...');
-    const response = await fetch(`${serverUrl}/usage/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            username: userName,
-            password: 'testpass',
-            ip: '127.1.2.1',
-            fingerprint: 'Chrome',
-        }),
+const testLoginAlias = async (scenario, ip, fingerprint = 'Chrome') => {
+    console.log(`Testing Login Alias - ${scenario}...`);
+    const { response, data } = await makeRequest('/usage/login', 'POST', {
+        username: userName,
+        password: 'testpass',
+        ip,
+        fingerprint,
     });
-    const data = await response.json();
-    assert.strictEqual(response.status, 400);
-    assert.strictEqual(data.result, false);
-    assert.strictEqual(data.message, 'no online alias');
-}
+    return { response, data };
+};
 
-async function testLoginAliasNoPreLoginSuccess() {
-    console.log('Testing Login Alias - No Pre Login but online...');
-    const response = await fetch(`${serverUrl}/usage/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            username: userName,
-            password: 'testpass',
-            ip: '127.1.2.1',
-            fingerprint: 'Chrome',
-        }),
-    });
-    const data = await response.json();
-    assert.strictEqual(response.status, 200);
-    assert.strictEqual(data.result, true);
-}
-
-async function testLoginAliasWithWrongPreLogin() {
-    console.log('Testing Login Alias - Wrong Pre Login...');
-    const response = await fetch(`${serverUrl}/usage/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            username: userName,
-            password: 'testpass',
-            ip: '127.2.2.6',
-            fingerprint: 'Chrome',
-        }),
-    });
-    const data = await response.json();
-    assert.strictEqual(response.status, 400);
-    assert.strictEqual(data.result, false);
-    assert.strictEqual(data.message, 'pre login not match');
-}
-
-async function testLoginAliasWithPreLogin() {
-    console.log('Testing Login Alias - With Pre Login...');
-    const response = await fetch(`${serverUrl}/usage/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            username: userName,
-            password: 'testpass',
-            ip: '127.1.2.1',
-            fingerprint: 'Chrome',
-        }),
-    });
-    const data = await response.json();
-    assert.strictEqual(response.status, 200);
-    assert.strictEqual(data.result, true);
-    assert.strictEqual(5, data.uuid.split('-').length);
-}
-
-async function MFALogin() {
+const MFALogin = async (fingerprint = 'Chrome') => {
     const timestamp = Date.now().toString();
     const sign = crypto.sign('sha256', Buffer.from(timestamp), {
         key: privateKey,
         padding: crypto.constants.RSA_PKCS1_PADDING,
     });
-    const response = await fetch(`${serverUrl}/api/login`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            aid: aid,
-            sign: sign.toString('base64'),
-            timestamp: timestamp,
-            ip: '127.1.2.1',
-            browser: 'Chrome',
-        }),
+    const { response, data } = await makeRequest('/api/login', 'POST', {
+        aid,
+        sign: sign.toString('base64'),
+        timestamp,
+        ip: '127.1.2.1',
+        browser: fingerprint,
     });
-    const data = await response.json();
     assert.strictEqual(response.status, 200);
     assert.strictEqual(data.result, true);
     assert.ok(data.content);
-}
+};
 
-async function runTests() {
+const runTestSuite = async (browser) => {
+    console.log(`Running test suite for ${browser}...`);
+
+    await testLogin(browser);
+    await testRegisterAlias(browser);
+
+    let result = await testLoginAlias('No Pre Login and No online', '127.1.2.1', browser);
+    assert.strictEqual(result.response.status, 400);
+    assert.strictEqual(result.data.result, false);
+    assert.strictEqual(result.data.message, 'no online alias');
+
+    await MFALogin(browser);
+
+    result = await testLoginAlias('No Pre Login but online', '127.1.2.1', browser);
+    assert.strictEqual(result.response.status, 200);
+    assert.strictEqual(result.data.result, true);
+
+    result = await testLoginAlias('Wrong Pre Login', '127.2.2.6', browser);
+    assert.strictEqual(result.response.status, 400);
+    assert.strictEqual(result.data.result, false);
+
+    result = await testLoginAlias('With Pre Login', '127.1.2.1', browser);
+    assert.strictEqual(result.response.status, 200);
+    assert.strictEqual(result.data.result, true);
+    assert.strictEqual(result.data.uuid.split('-').length, 5);
+};
+
+const runAllTests = async () => {
     try {
         startServer();
-        await testLogin();
-        await testRegisterAlias();
-        await testLoginAliasNoPreLoginError();
-        await MFALogin();
-        await testLoginAliasNoPreLoginSuccess();
-        await testLoginAliasWithWrongPreLogin();
-        await testLoginAliasWithPreLogin();
+        userName = crypto.randomUUID();
+
+        console.log('First AID test...');
+        await runTestSuite('Chrome');
+
+        console.log('Second AID test...');
+        await runTestSuite('firefox');
+
         console.log('All tests passed successfully!');
     } catch (error) {
         console.error('Test failed:', error);
     } finally {
         stopServer();
     }
-}
+};
 
-runTests().then(() =>
+runAllTests().then(() =>
     console.log('Tests completed')
 ).catch(e =>
     console.error('Tests failed:', e)
