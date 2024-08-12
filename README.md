@@ -1,26 +1,26 @@
 # aid
-final aid project, include frontend SDK, backend, backend SDK
+this project include aid server implementation and full stack demo.
 
-## 專案結構
+## Concept
 
-![專案結構](./doc/aid_demo.png)
+provide rest api for service to check user identity message.
 
-![img.png](doc/demo-api.png)
+## paper
 
-```mermaid
-graph LR
-    A[wallet] -->|Register| B[AID Server]
-    A -->|Login| B
-    A -.->|copy and paste| C[Mobile App]
-    C -->|Register| D[App Backend]
-    C -->|Login| D
-    D -->|ask| B
-    D -->|check| B
-    D -->|verify| B
-    C -->|Bind| D
-    
-    style A fill:#203590,stroke:#000000,stroke-width:2px
-    style B fill:#203590,stroke:#000000,stroke-width:2px
-    style C fill:#206690,stroke:#000000,stroke-width:2px
-    style D fill:#206690,stroke:#000000,stroke-width:2px
-```
+- [Design and Implementation of Autonomous Identity System Based on OurChain](https://github.com/leon123858/aid-paper)
+
+## aid system
+
+![img.png](doc/overview-dark.png)
+
+- OurChain is a blockchain system that can sync data between different aid-server.
+- Wallet can ask OurChain to do some operation.
+- Wallet is embedded with frontend application, which can communicate with service.
+- Service is a backend application that can communicate with aid-server.
+
+related project:
+- [aid-server](https://github.com/leon123858/aid)
+- [aid-wallet](https://github.com/leon123858/aidjs)
+- [aid-service](https://github.com/leon123858/aidgo)
+- [OurChain](https://github.com/leon123858/OurChain)
+- [OurChain-Agent](https://github.com/leon123858/ourchain-agent)
