@@ -3,7 +3,7 @@ this project include aid server implementation and full stack demo.
 
 ## Concept
 
-provide rest api for service to check user identity message.
+provide rest api for service and wallet to verify user's claim.
 
 ## paper
 
@@ -11,12 +11,33 @@ provide rest api for service to check user identity message.
 
 ## aid system
 
-![img.png](doc/overview-dark.png)
+four type of aid system:
 
-- OurChain is a blockchain system that can sync data between different aid-server.
-- Wallet can ask OurChain to do some operation.
-- Wallet is embedded with frontend application, which can communicate with service.
-- Service is a backend application that can communicate with aid-server.
+### type1
+
+![img.png](doc/overview-t1.png)
+
+- do not include blockchain and any other server, a P2P system.
+- wallet create a id locally, and proof by itself.
+
+### type2
+
+![img.png](doc/overview-t2.png)
+
+- include a server, which can store user id and let service verify user's claim.
+
+### type3
+
+![img.png](doc/overview-t3.png)
+
+- like type2, but use OurChain to replace server.
+
+### type4
+
+![img.png](doc/overview-t4.png)
+
+- base on type3, but each user can ask a server to verify user's claim.
+- also can know as a mixture of type2 and type3.
 
 related project:
 - [aid-server](https://github.com/leon123858/aid)
