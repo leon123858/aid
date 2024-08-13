@@ -1,4 +1,4 @@
-import {AidList, Aid} from "aid-js-sdk"
+import {Aid, AidList} from "aid-js-sdk"
 
 export const readAidListFromLocalStorage = (): AidList => {
     const defaultUserInfosZip = localStorage.getItem('defaultUserInfosZip');
@@ -17,7 +17,7 @@ export const writeAidListToLocalStorage = (aidList: AidList): void => {
     localStorage.setItem('aidsZip', JSON.stringify(aidList.aids));
 }
 
-export const  readAid = (aid: string): Aid | null => {
+export const readAid = (aid: string): Aid | null => {
     const aidStr = localStorage.getItem(aid);
     if (aidStr === null) {
         return null;
