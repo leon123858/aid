@@ -13,7 +13,13 @@ import {
 } from '@ant-design/icons';
 
 import {AidList, AidPreview} from "aid-js-sdk";
-import {generateNewAid, readAid, readAidListFromLocalStorage, writeAidListToLocalStorage} from "./utils";
+import {
+    generateNewAid,
+    getDefaultAid,
+    readAidListFromLocalStorage,
+    writeAid,
+    writeAidListToLocalStorage
+} from "./utils";
 
 interface Todo {
     id: number;
@@ -64,17 +70,17 @@ export const TodoList: React.FC = () => {
     const actionButtons: ActionButton[] = [
         {
             icon: <LoginOutlined/>, text: 'Login', callback: () => {
-                aidList = readAidListFromLocalStorage();
-                if (aidList.aids.length === 0) {
-                    alert("No AID found");
-                    return;
+                if(getDefaultAid(aidList)){
+                    alert("Login success");
+                    return
                 }
-                const targetAid = aidList.aids[0];
-                const aid = readAid(targetAid.aid);
-                if (aid === null) {
-                    return;
-                }
-                const data = aid?.getData("todos");
+                alert("aid not found");
+            }
+        },
+        {icon: <LogoutOutlined/>, text: 'Logout', callback: () => setTodos([])},
+        {
+            icon: <UploadOutlined/>, text: 'Upload', callback: () => {
+                const data = getDefaultAid(aidList)?.getData("todos");
                 if (data !== undefined) {
                     setTodos(JSON.parse(data));
                 } else {
@@ -82,11 +88,18 @@ export const TodoList: React.FC = () => {
                 }
             }
         },
-        {icon: <LogoutOutlined/>, text: 'Logout', callback: () => setTodos([])},
-        {icon: <UploadOutlined/>, text: 'Upload'},
-        {icon: <DownloadOutlined/>, text: 'Download', callback: () => {
-
-            }},
+        {
+            icon: <DownloadOutlined/>, text: 'Download', callback: () => {
+                const aid = getDefaultAid(aidList)
+                if (!aid) {
+                    alert("aid not found");
+                    return
+                }
+                aid.setData("todos", JSON.stringify(todos));
+                console.log(aid);
+                writeAid(aid);
+            }
+        },
         {icon: <ShareAltOutlined/>, text: 'Share'},
         {icon: <EyeOutlined/>, text: 'View'},
         {
@@ -96,6 +109,7 @@ export const TodoList: React.FC = () => {
                 const preview = new AidPreview(newAid.aid, new Map());
                 aidList.addAid(preview)
                 writeAidListToLocalStorage(aidList);
+                alert("New Aid generated: 本 demo 預設只處理第一個 Aid, 不實作完整錢包");
             }
         },
     ];

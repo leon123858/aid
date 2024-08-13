@@ -2706,10 +2706,10 @@ agent-base@6:
   dependencies:
     debug "4"
 
-aid-js-sdk@^0.1.2:
-  version "0.1.2"
-  resolved "https://registry.yarnpkg.com/aid-js-sdk/-/aid-js-sdk-0.1.2.tgz#ec8e073a06765a9103a73b78a881254cce7ecc9d"
-  integrity sha512-8QXtN7oAe8IemFMrWNy6/am+TiogCT1EDFIR883nDciyM2NFWDO+CjhVbtjNnzLbgqF++IB2eoEuN91OPfcIQg==
+aid-js-sdk@^0.1.3:
+  version "0.1.3"
+  resolved "https://registry.yarnpkg.com/aid-js-sdk/-/aid-js-sdk-0.1.3.tgz#910a89d0c889ebbd50d246e2e677c1084b000406"
+  integrity sha512-lTmyf3clqlEWDAw0JqwioS3PPupqZVpOShne31qMpYqrpMNPLuIzTUoqATKk6f8ZOInsO6yBSj8dTSZ7H9U41A==
 
 ajv-formats@^2.1.1:
   version "2.1.1"
