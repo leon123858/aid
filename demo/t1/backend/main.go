@@ -10,11 +10,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
+	"github.com/leon123858/aidgo"
 	"net/http"
 	"strconv"
 	"time"
-
-	"github.com/leon123858/aidgo"
 )
 
 type (
@@ -42,30 +42,33 @@ func init() {
 		// msg is a ["Hello World!", "signature"]
 		originalString := msg.([]string)[0]
 		signatureBase64 := msg.([]string)[1]
-		// certOption is a map[string]string{"publicKey": "base64 encoded public key"}
-		publicKeyBase64 := certOption.(map[string]string)["publicKey"]
+		publicKeyPemString := certOption.(string)
 		// base64 to []byte
 		signature, err := base64.StdEncoding.DecodeString(signatureBase64)
 		if err != nil {
 			return err
 		}
-		publicKeyByte, err := base64.StdEncoding.DecodeString(publicKeyBase64)
-		if err != nil {
-			return err
-		}
 		// publicKey to rsa.PublicKey
-		block, _ := pem.Decode(publicKeyByte)
-		if block == nil {
-			return aidgo.NewBadRequestError("Failed to decode PEM block")
+		block, _ := pem.Decode([]byte(publicKeyPemString))
+		if block == nil || block.Type != "PUBLIC KEY" {
+			return aidgo.NewInternalServerError("failed to decode PEM block containing public key")
 		}
-		publicKey, err := x509.ParsePKCS1PublicKey(block.Bytes)
+		publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
 		if err != nil {
 			return err
+		}
+		rsaPublicKey, ok := publicKey.(*rsa.PublicKey)
+		if !ok {
+			return aidgo.NewInternalServerError("failed to parse public key")
 		}
 		// verify the signature
-		hashedMsg := sha256.Sum256([]byte(originalString))
-		err = rsa.VerifyPKCS1v15(publicKey, crypto.SHA256, hashedMsg[:], signature)
-		return err
+		hashed := sha256.Sum256([]byte(originalString))
+		err = rsa.VerifyPKCS1v15(rsaPublicKey, crypto.SHA256, hashed[:], signature)
+		if err != nil {
+			log.Error(err)
+			return err
+		}
+		return nil
 	}
 }
 
@@ -75,45 +78,13 @@ func main() {
 	// Middleware
 	e.Use(middleware.Logger())
 	e.Use(middleware.Recover())
+	e.Use(middleware.CORS())
 
 	// Routes
 	e.GET("/todos/:aid", getTodos)
 	e.POST("/login/:aid", login)
-	// verify middleware
-	e.Use(func(next echo.HandlerFunc) echo.HandlerFunc {
-		return func(c echo.Context) error {
-			sign := c.Request().Header.Get("Sign")
-			preSign := c.Request().Header.Get("PreSign")
-			aid := c.Param("aid")
-			aidUUID, err := uuid.Parse(aid)
-			if err != nil {
-				return echo.ErrUnauthorized
-			}
-			// check preSign is near current time in 5 seconds, so convert string to int64
-			const maxTimeDiff int64 = 5 // 允許的最大時間差(秒)
-
-			timestamp, err := strconv.ParseInt(preSign, 10, 64)
-			if err != nil {
-				return echo.ErrUnauthorized
-			}
-
-			now := time.Now().Unix()
-			timeDiff := now - timestamp
-
-			if timeDiff > maxTimeDiff || timeDiff < -maxTimeDiff {
-				return echo.ErrUnauthorized
-			}
-
-			// verify sign, hash preSign and decrypt sign
-			err = aidVerifier.VerifyCert(aidUUID, "rsa", []string{preSign, sign}, verifyGenerator)
-			if err != nil {
-				return echo.ErrUnauthorized
-			}
-			return next(c)
-		}
-	})
-	e.POST("/logout/:aid", logout)
-	e.POST("/todos/:aid", createTodos)
+	e.POST("/logout/:aid", logout, middlewareFunc)
+	e.POST("/todos/:aid", createTodos, middlewareFunc)
 
 	// Start server
 	e.Logger.Fatal(e.Start(":8080"))
@@ -149,6 +120,10 @@ func logout(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"result": err.Error()})
 	}
+	err = aidVerifier.ClearData(aidUUID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"result": err.Error()})
+	}
 	return c.JSON(http.StatusOK, map[string]string{"result": "success"})
 }
 
@@ -164,7 +139,7 @@ func getTodos(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"result": err.Error()})
 	}
-	return c.JSON(http.StatusOK, data.Data["todoList"].([]TodoItem))
+	return c.JSON(http.StatusOK, data.Data["todoList"].(*[]TodoItem))
 }
 
 func createTodos(c echo.Context) error {
@@ -179,7 +154,7 @@ func createTodos(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"result": err.Error()})
 	}
-	// get data
+	// save data
 	err = aidVerifier.SaveData(aidgo.AidData{
 		Aid:  aidUUID,
 		Data: map[string]interface{}{"todoList": req},
@@ -188,4 +163,38 @@ func createTodos(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"result": err.Error()})
 	}
 	return c.JSON(http.StatusOK, map[string]string{"result": "success"})
+}
+
+func middlewareFunc(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		sign := c.Request().Header.Get("Sign")
+		preSign := c.Request().Header.Get("PreSign")
+		aid := c.Param("aid")
+		aidUUID, err := uuid.Parse(aid)
+		if err != nil {
+			return echo.ErrUnauthorized
+		}
+		// 允許的最大時間差(秒)
+		const maxTimeDiff int64 = 60
+
+		timestamp, err := strconv.ParseInt(preSign, 10, 64)
+		if err != nil {
+			return echo.ErrUnauthorized
+		}
+
+		now := time.Now().Unix()
+		timeDiff := now - timestamp/1000
+
+		if timeDiff > maxTimeDiff || timeDiff < -maxTimeDiff {
+			return echo.ErrUnauthorized
+		}
+
+		// verify sign, hash preSign and decrypt sign
+		err = aidVerifier.VerifyCert(aidUUID, "rsa", []string{preSign, sign}, verifyGenerator)
+		println(err)
+		if err != nil {
+			return echo.ErrUnauthorized
+		}
+		return next(c)
+	}
 }

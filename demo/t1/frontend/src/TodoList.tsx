@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, { useState} from 'react';
 import {Button, Checkbox, Input, List, Space} from 'antd';
 import {
     DeleteOutlined,
@@ -12,14 +12,15 @@ import {
     UploadOutlined
 } from '@ant-design/icons';
 
-import {AidList, AidPreview} from "aid-js-sdk";
+import { AidList, AidPreview} from "aid-js-sdk";
 import {
     generateNewAid,
-    getDefaultAid,
+    getDefaultAid, pemToPrivateKey,
     readAidListFromLocalStorage,
     writeAid,
     writeAidListToLocalStorage
 } from "./utils";
+import {TodoApiClient} from "./api";
 
 interface Todo {
     id: number;
@@ -34,6 +35,7 @@ interface ActionButton {
 }
 
 let aidList: AidList;
+let serviceClient: TodoApiClient | null = null
 
 export const TodoList: React.FC = () => {
     const [todos, setTodos] = useState<Todo[]>([]);
@@ -70,14 +72,65 @@ export const TodoList: React.FC = () => {
     const actionButtons: ActionButton[] = [
         {
             icon: <LoginOutlined/>, text: 'Login', callback: () => {
-                if(getDefaultAid(aidList)){
-                    alert("Login success");
+                if (serviceClient) {
+                    alert("Already login");
+                    return
+                }
+                const aid = getDefaultAid(aidList);
+                if (aid) {
+                    // login service
+                    const defaultAid = getDefaultAid(aidList)
+                    if (!defaultAid) {
+                        alert("錢包無Aid")
+                        return
+                    }
+                    const defaultAidPkg = defaultAid.listCerts()[0]
+                    if (!defaultAidPkg) {
+                        alert("錢包無Cert Pkg")
+                        return
+                    }
+                    if (!defaultAidPkg.cert) {
+                        alert("錢包無Cert")
+                        return
+                    }
+                    if (!defaultAidPkg.privateMsg) {
+                        alert("錢包無privateMsg")
+                        return
+                    }
+                    const cert = defaultAidPkg.cert
+                    pemToPrivateKey(defaultAidPkg.privateMsg).then(privateKey => {
+                        serviceClient = new TodoApiClient(defaultAid.aid, privateKey, cert)
+                    }).then(()=>{
+                        return serviceClient?.login(cert)
+                    }).then((r)=>{
+                        if (!r) {
+                            alert("login failed")
+                            return
+                        }
+                        alert(r.result)
+                    }).catch(e => {
+                        console.error(e)
+                        alert("pemToPrivateKey error")
+                    })
                     return
                 }
                 alert("aid not found");
             }
         },
-        {icon: <LogoutOutlined/>, text: 'Logout', callback: () => setTodos([])},
+        {icon: <LogoutOutlined/>, text: 'Logout', callback: () => {
+                if (!serviceClient) {
+                    alert("Already logout");
+                    return
+                }
+                serviceClient.logout().then(r => {
+                    serviceClient = null;
+                    setTodos([]);
+                    alert(r.result);
+                }).catch(e => {
+                    console.error(e)
+                    alert("Logout error")
+                })
+            }},
         {
             icon: <UploadOutlined/>, text: 'Upload', callback: () => {
                 const data = getDefaultAid(aidList)?.getData("todos");
@@ -100,16 +153,49 @@ export const TodoList: React.FC = () => {
                 writeAid(aid);
             }
         },
-        {icon: <ShareAltOutlined/>, text: 'Share'},
-        {icon: <EyeOutlined/>, text: 'View'},
+        {icon: <ShareAltOutlined/>, text: 'Share', callback: () => {
+                const aid = getDefaultAid(aidList)
+                if (!aid) {
+                    alert("aid not found");
+                    return
+                }
+                alert(`Aid: ${aid.aid}`);
+                // send list of todos to server
+                if (serviceClient) {
+                    serviceClient.createTodos(todos).then(r => {
+                        alert(r.result);
+                    }).catch(e => {
+                        console.error(e)
+                        alert("createTodos error")
+                    })
+                } else {
+                    alert("serviceClient not found")
+                }
+        }},
+        {icon: <EyeOutlined/>, text: 'View', callback: () => {
+                const targetAid = prompt("Enter Aid to view");
+                if (targetAid === null) {
+                    alert("please input remote Aid to view");
+                }
+                if (serviceClient) {
+                    serviceClient.getTodos(targetAid as string).then(todos => {
+                        setTodos(todos.map((todo, index) => ({id: index, task: todo.task, done: todo.done})))
+                    }).catch(e => {
+                        console.error(e)
+                        alert("getTodos error")
+                    })
+                } else {
+                    alert("serviceClient not found")
+                }
+            }},
         {
-            icon: <RobotOutlined/>, text: 'Generate Aid', callback: () => {
+            icon: <RobotOutlined/>, text: 'Generate Aid', callback: async () => {
                 aidList = readAidListFromLocalStorage();
-                const newAid = generateNewAid();
+                const newAid = await generateNewAid();
                 const preview = new AidPreview(newAid.aid, new Map());
                 aidList.addAid(preview)
                 writeAidListToLocalStorage(aidList);
-                alert("New Aid generated: 本 demo 預設只處理第一個 Aid, 不實作完整錢包");
+                alert("New Aid generated: 本 demo 預設只處理第一個 Aid 與 一個 cert, 不實作完整錢包");
             }
         },
     ];
