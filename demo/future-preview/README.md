@@ -2,7 +2,7 @@
 
 This is copy from `https://github.com/microsoft/ai-chat-protocol`
 
-The goal of this project to want to preview how will aid be used in the future.
+The goal of this project is want to preview how will aid be used in the future.
 
 This domo do not include real aid system module, if you want to see real aid system, please visit other demo.
 
