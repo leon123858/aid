@@ -10,7 +10,7 @@ import {
     RobotOutlined,
     ShareAltOutlined,
     UploadOutlined,
-    BugOutlined,
+    BugOutlined, UserOutlined,
 } from '@ant-design/icons';
 
 import {AidCertHash, AidList, AidPreview, pemToPrivateKey} from "aid-js-sdk";
@@ -251,6 +251,46 @@ export const TodoList: React.FC = () => {
                 }).catch(e => {
                     console.error(e)
                     alert("pemToPrivateKey error")
+                })
+            }
+        },
+        {
+            icon: <UserOutlined/>, text: 'try 實名', callback: () => {
+                alert("測試獲取實名制AC簽章")
+                const defaultAid = getDefaultAid(aidList)
+                if (!defaultAid) {
+                    alert("錢包無Aid")
+                    return
+                }
+                const defaultAidPkg = defaultAid.listCerts()[0]
+                if (!defaultAidPkg) {
+                    alert("錢包無Cert Pkg")
+                    return
+                }
+                if (!defaultAidPkg.cert) {
+                    alert("錢包無Cert")
+                    return
+                }
+                if (!defaultAidPkg.privateMsg) {
+                    alert("錢包無privateMsg")
+                    return
+                }
+                const cert = defaultAidPkg.cert
+                if (!serviceClient) {
+                    alert("serviceClient not found")
+                    return
+                }
+                serviceClient?.getServerPublicKey().then((pubKey) => {
+                    alert(pubKey)
+                }).then(() => {
+                    return serviceClient?.askServerSignCert(cert, {some: "data"})
+                }).then((r) => {
+                    if(r){
+                        alert(r.Sign)
+                    }
+                }).catch(e => {
+                    console.error(e)
+                    alert("getServerPublicKey error")
                 })
             }
         }

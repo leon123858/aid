@@ -2,6 +2,7 @@ package controller
 
 import (
 	"aid-server/service/sign"
+	"crypto/sha256"
 	"encoding/base64"
 	"github.com/labstack/echo/v4"
 	"github.com/leon123858/aidgo"
@@ -38,7 +39,9 @@ func AskServerSignCert(c echo.Context) error {
 	if err != nil {
 		return cw.newInternalServerError(err.Error())
 	}
-	signature, err := sign.RsaSign(privateKey, []byte(hashAidCert))
+	// hash the hashAidCert
+	hashHashAidCert := sha256.Sum256([]byte(hashAidCert))
+	signature, err := sign.RsaSign(privateKey, hashHashAidCert[:])
 	if err != nil {
 		return cw.newInternalServerError(err.Error())
 	}

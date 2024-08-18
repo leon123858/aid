@@ -112,4 +112,42 @@ export class TodoApiClient {
 
         return response.json();
     }
+
+    async getServerPublicKey(): Promise<string> {
+        const response = await fetch(`${AID_SERVER_URL}/ac/get/key`, {
+            method: 'GET',
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to get server public key');
+        }
+
+        const data = await response.json();
+        return data.data; // Assuming the public key is in the 'data' field of the response
+    }
+
+    async askServerSignCert(cert: AidCert, info: any): Promise<AidCert> {
+        const request: {
+            cert: AidCert,
+            info: any,
+        } = {
+            cert,
+            info,
+        };
+
+        const response = await fetch(`${AID_SERVER_URL}/ac/sign/cert`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(request),
+        });
+
+        if (!response.ok) {
+            throw new Error('Failed to ask server to sign certificate');
+        }
+
+        const data = await response.json();
+        return data.data; // Assuming the signed cert is in the 'data' field of the response
+    }
 }
