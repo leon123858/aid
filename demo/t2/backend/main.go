@@ -28,14 +28,22 @@ var (
 )
 
 func init() {
-	verifyGenerator.P2p = func(aid uuid.UUID, option string, msg interface{}, certOption interface{}) error {
+	verifyGenerator.Server = func(aid uuid.UUID, option string, msg interface{}, cert aidgo.AidCert, info aidgo.ServerInfo) error {
 		if option != "rsa" {
 			return aidgo.NewNotImplementedError("option not implemented")
 		}
 		// msg is a ["Hello World!", "signature"]
 		originalString := msg.([]string)[0]
 		signatureBase64 := msg.([]string)[1]
-		publicKeyPemString := certOption.(string)
+		publicKeyPemString := cert.VerifyOptions[option].(string)
+		// verify by aid server, cert hash should match hash in aid server
+		hash, err := aidServerClient.RequestHash(aid.String(), info.ServerAddress)
+		if err != nil {
+			return aidgo.NewBadRequestError(err.Error())
+		}
+		if cert.Hash() != hash {
+			return aidgo.NewAidCustomError(403, "hash not match")
+		}
 		// use default rsa verify algo
 		return aidgo.DefaultRsaVerifyAlgo(originalString, signatureBase64, publicKeyPemString)
 	}
@@ -68,16 +76,8 @@ func login(c echo.Context) error {
 	if req.Cert.Aid.String() != c.Param("aid") {
 		return c.JSON(http.StatusBadRequest, map[string]string{"result": "aid not match"})
 	}
-	// cert hash should match hash in aid server
-	hash, err := aidServerClient.RequestHash(c.Param("aid"))
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"result": err.Error()})
-	}
-	if req.Cert.Hash() != hash {
-		return c.JSON(http.StatusBadRequest, map[string]string{"result": "hash not match"})
-	}
 	// save cert
-	err = aidVerifier.SaveCert(req.Cert)
+	err := aidVerifier.SaveCert(req.Cert)
 	if err != nil {
 		return err
 	}

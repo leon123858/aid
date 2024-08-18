@@ -39,10 +39,10 @@ export const generateNewAid = async (): Promise<Aid> => {
     const pair = await generateRSAKeyPair();
 
     newAid.addCert({
-        BlockChainUrl: "", ContractAddress: "", ServerAddress: "http://localhost:8080",
+        BlockChainUrl: "", ContractAddress: "", ServerAddress: "http://localhost:7001",
         Sign: "",
         Aid: uuid,
-        CertType: AidType.P2p,
+        CertType: AidType.Server,
         Claims: {},
         Setting: {},
         VerifyOptions: {

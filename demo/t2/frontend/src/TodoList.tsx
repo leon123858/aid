@@ -101,18 +101,17 @@ export const TodoList: React.FC = () => {
                     const cert = defaultAidPkg.cert
                     pemToPrivateKey(defaultAidPkg.privateMsg).then(privateKey => {
                         serviceClient = new TodoApiClient(defaultAid.aid, privateKey)
+                    }).then(()=>{
+                        return serviceClient?.login(cert).then(r => {
+                            alert(r.result);
+                        }).catch(e => {
+                            console.error(e)
+                            alert("login error")
+                        })
                     }).then(() => {
                         return AidCertHash.Hash(cert)
                     }).then((h) => {
                         return serviceClient?.registerAidRemote(h)
-                    }).then(() => {
-                        return serviceClient?.login(cert)
-                    }).then((r) => {
-                        if (!r) {
-                            alert("login failed")
-                            return
-                        }
-                        alert(r.result)
                     }).catch(e => {
                         console.error(e)
                         alert("pemToPrivateKey error")
@@ -211,7 +210,7 @@ export const TodoList: React.FC = () => {
         },
         {
             icon: <BugOutlined/>, text: 'bug trigger', callback: () => {
-                alert("try to create an same aid with wrong cert to trigger aid server function")
+                alert("在aid server註冊不同的 hash, 因此之後 verify 會失敗(記得清空localStorage+各服務db再做實驗)")
                 // edit cert to trigger bug
                 const defaultAid = getDefaultAid(aidList)
                 if (!defaultAid) {
@@ -240,8 +239,6 @@ export const TodoList: React.FC = () => {
                     return AidCertHash.Hash(cert)
                 }).then((h) => {
                     return serviceClient?.registerAidRemote(h)
-                }).then(() => {
-                    return serviceClient?.login(cert)
                 }).then((r) => {
                     if (!r) {
                         alert("login failed")

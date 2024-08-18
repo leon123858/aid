@@ -5,10 +5,8 @@ import (
 	"github.com/go-resty/resty/v2"
 )
 
-const AIDServerURL = "http://localhost:7001"
-
 type AIDServerClientInterface interface {
-	RequestHash(aid string) (string, error)
+	RequestHash(aid string, url string) (string, error)
 }
 
 type AIDServerClient struct {
@@ -21,10 +19,10 @@ func NewAIDServerClient() AIDServerClientInterface {
 	}
 }
 
-func (c *AIDServerClient) RequestHash(aid string) (string, error) {
+func (c *AIDServerClient) RequestHash(aid string, url string) (string, error) {
 	resp, err := c.client.R().
 		SetQueryParam("aid", aid).
-		Get(AIDServerURL + "/verify/hash")
+		Get(url + "/verify/hash")
 	if err != nil {
 		return "", err
 	}

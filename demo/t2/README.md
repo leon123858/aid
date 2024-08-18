@@ -1,4 +1,4 @@
-# DEMO of Type1
+# DEMO of Type2
 
 this is a demo of type2 AID
 
@@ -15,3 +15,10 @@ a todo list can use aid to log in a remote todo list application, which can shar
 1. start the AID server (use `make` in `(root)/aid-server`)
 2. start the backend (use `make`)
 3. start the frontend (use `yarn start`)
+
+## Note
+
+- you can clear DB in `(root)/aid-server` by `make clean`
+- you also need to clear browser local storage to do experiments again
+- after use `bug` button register aid in AID Server, although you can login with the same aid, you can't share the todo list with others, because your cert can not pass verification from aid server.
+- backend can also forbid the login that can't pass the verification of the aid server.
