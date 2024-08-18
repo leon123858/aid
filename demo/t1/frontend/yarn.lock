@@ -2666,10 +2666,10 @@ agent-base@6:
   dependencies:
     debug "4"
 
-aid-js-sdk@^0.1.7:
-  version "0.1.7"
-  resolved "https://registry.npmjs.org/aid-js-sdk/-/aid-js-sdk-0.1.7.tgz"
-  integrity sha512-TvL6SoQf4BbDaTKKpv9rirtnnKDGNwmWDA5ieDC0A7MN8H+9/w1whge3pISv7SkWJ93bmThfuMMPrYfBphmEjw==
+aid-js-sdk@^0.1.9:
+  version "0.1.9"
+  resolved "https://registry.npmjs.org/aid-js-sdk/-/aid-js-sdk-0.1.9.tgz"
+  integrity sha512-WVnZatx5T2oDT/s1QKjPp2XyUvQJRwRzAjkSJh02NuK4bVN5fPpEOFigCvXdAdAGdAAAh8WiuK2qfqePaDzdaQ==
 
 ajv-formats@^2.1.1:
   version "2.1.1"

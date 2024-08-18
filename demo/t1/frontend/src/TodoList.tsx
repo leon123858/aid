@@ -12,10 +12,10 @@ import {
     UploadOutlined
 } from '@ant-design/icons';
 
-import { AidList, AidPreview} from "aid-js-sdk";
+import { AidList, AidPreview, pemToPrivateKey} from "aid-js-sdk";
 import {
     generateNewAid,
-    getDefaultAid, pemToPrivateKey,
+    getDefaultAid,
     readAidListFromLocalStorage,
     writeAid,
     writeAidListToLocalStorage
@@ -99,7 +99,7 @@ export const TodoList: React.FC = () => {
                     }
                     const cert = defaultAidPkg.cert
                     pemToPrivateKey(defaultAidPkg.privateMsg).then(privateKey => {
-                        serviceClient = new TodoApiClient(defaultAid.aid, privateKey, cert)
+                        serviceClient = new TodoApiClient(defaultAid.aid, privateKey)
                     }).then(()=>{
                         return serviceClient?.login(cert)
                     }).then((r)=>{

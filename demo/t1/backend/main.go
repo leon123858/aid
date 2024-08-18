@@ -1,20 +1,11 @@
 package main
 
 import (
-	"crypto"
-	"crypto/rsa"
-	"crypto/sha256"
-	"crypto/x509"
-	"encoding/base64"
-	"encoding/pem"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/labstack/gommon/log"
 	"github.com/leon123858/aidgo"
 	"net/http"
-	"strconv"
-	"time"
 )
 
 type (
@@ -43,32 +34,8 @@ func init() {
 		originalString := msg.([]string)[0]
 		signatureBase64 := msg.([]string)[1]
 		publicKeyPemString := certOption.(string)
-		// base64 to []byte
-		signature, err := base64.StdEncoding.DecodeString(signatureBase64)
-		if err != nil {
-			return err
-		}
-		// publicKey to rsa.PublicKey
-		block, _ := pem.Decode([]byte(publicKeyPemString))
-		if block == nil || block.Type != "PUBLIC KEY" {
-			return aidgo.NewInternalServerError("failed to decode PEM block containing public key")
-		}
-		publicKey, err := x509.ParsePKIXPublicKey(block.Bytes)
-		if err != nil {
-			return err
-		}
-		rsaPublicKey, ok := publicKey.(*rsa.PublicKey)
-		if !ok {
-			return aidgo.NewInternalServerError("failed to parse public key")
-		}
-		// verify the signature
-		hashed := sha256.Sum256([]byte(originalString))
-		err = rsa.VerifyPKCS1v15(rsaPublicKey, crypto.SHA256, hashed[:], signature)
-		if err != nil {
-			log.Error(err)
-			return err
-		}
-		return nil
+		// use default rsa verify algo
+		return aidgo.DefaultRsaVerifyAlgo(originalString, signatureBase64, publicKeyPemString)
 	}
 }
 
@@ -116,6 +83,7 @@ func logout(c echo.Context) error {
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"result": err.Error()})
 	}
+	// clear cert and data
 	err = aidVerifier.ClearCert(cert)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"result": err.Error()})
@@ -175,23 +143,13 @@ func middlewareFunc(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.ErrUnauthorized
 		}
 		// 允許的最大時間差(秒)
-		const maxTimeDiff int64 = 60
-
-		timestamp, err := strconv.ParseInt(preSign, 10, 64)
+		err = aidgo.DefaultTimestampTimeoutAlgo(preSign, 60)
 		if err != nil {
-			return echo.ErrUnauthorized
-		}
-
-		now := time.Now().Unix()
-		timeDiff := now - timestamp/1000
-
-		if timeDiff > maxTimeDiff || timeDiff < -maxTimeDiff {
 			return echo.ErrUnauthorized
 		}
 
 		// verify sign, hash preSign and decrypt sign
 		err = aidVerifier.VerifyCert(aidUUID, "rsa", []string{preSign, sign}, verifyGenerator)
-		println(err)
 		if err != nil {
 			return echo.ErrUnauthorized
 		}

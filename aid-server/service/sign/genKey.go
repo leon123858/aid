@@ -2,6 +2,7 @@ package sign
 
 import (
 	"aid-server/repository"
+	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"crypto/x509"
@@ -9,6 +10,7 @@ import (
 	"github.com/syndtr/goleveldb/leveldb/errors"
 	"log"
 	"sync"
+	"time"
 )
 
 type PemKeyPair struct {
@@ -16,7 +18,7 @@ type PemKeyPair struct {
 	PublicKey  string `json:"publicKey"`
 }
 
-func (p *PemKeyPair) toCryptoKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) {
+func (p *PemKeyPair) ToCryptoKeys() (*rsa.PrivateKey, *rsa.PublicKey, error) {
 	var wg sync.WaitGroup
 	wg.Add(2)
 
@@ -106,12 +108,12 @@ func pemToPublicKey(pemString string) (*rsa.PublicKey, error) {
 
 func GenerateKey() PemKeyPair {
 	// check if db have keys
-	keys, err := GetKeysFromDB()
+	keys, err := getKeysFromDB()
 	if err != nil {
 		// generate new key
-		privateKey, publicKey := GenerateNewKey()
+		privateKey, publicKey := generateNewKey()
 		// save to db
-		err = SaveKeysToDB(privateKey, publicKey)
+		err = saveKeysToDB(privateKey, publicKey)
 		if err != nil {
 			log.Fatalf("Failed to save keys to db: %v", err)
 		}
@@ -124,51 +126,70 @@ func GenerateKey() PemKeyPair {
 	return keys
 }
 
-func GetKeysFromDB() (PemKeyPair, error) {
-	readPrivateChan := make(chan []byte, 1)
-	readPubChan := make(chan []byte, 1)
-	errChan := make(chan error, 2)
-	defer close(readPrivateChan)
-	defer close(readPubChan)
-	defer close(errChan)
+func getKeysFromDB() (PemKeyPair, error) {
+	type keyResult struct {
+		pemString string
+		err       error
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
+	defer cancel()
+	publicPemStrChan := make(chan keyResult)
+	privatePemStrChan := make(chan keyResult)
+	wg := sync.WaitGroup{}
+	wg.Add(2)
 	go func() {
+		defer wg.Done()
 		read, err := repository.LDB.Read([]byte("publicKey"))
 		if err != nil {
-			errChan <- err
+			publicPemStrChan <- keyResult{pemString: "", err: err}
+			return
 		}
 		if read == nil {
-			readPubChan <- nil
+			publicPemStrChan <- keyResult{pemString: "", err: nil}
+			return
 		}
+		publicPemStrChan <- keyResult{pemString: string(read), err: nil}
 	}()
 	go func() {
+		defer wg.Done()
 		read, err := repository.LDB.Read([]byte("privateKey"))
 		if err != nil {
-			errChan <- err
+			privatePemStrChan <- keyResult{pemString: "", err: err}
+			return
 		}
 		if read == nil {
-			readPrivateChan <- nil
+			privatePemStrChan <- keyResult{pemString: "", err: nil}
+			return
 		}
+		privatePemStrChan <- keyResult{pemString: string(read), err: nil}
+	}()
+	go func() {
+		wg.Wait()
+		close(publicPemStrChan)
+		close(privatePemStrChan)
 	}()
 	// select error or success
 	kp := PemKeyPair{}
 	for i := 2; i > 0; i-- {
 		select {
-		case err := <-errChan:
-			return PemKeyPair{}, err
-		case kp.PrivateKey = <-readPrivateChan:
-			if kp.PrivateKey != "" && kp.PublicKey != "" {
-				return kp, nil
+		case result := <-publicPemStrChan:
+			if result.err != nil {
+				return kp, result.err
 			}
-		case kp.PublicKey = <-readPubChan:
-			if kp.PrivateKey != "" && kp.PublicKey != "" {
-				return kp, nil
+			kp.PublicKey = result.pemString
+		case result := <-privatePemStrChan:
+			if result.err != nil {
+				return kp, result.err
 			}
+			kp.PrivateKey = result.pemString
+		case <-ctx.Done():
+			return kp, errors.New("timeout")
 		}
 	}
-	return kp, errors.New("empty key found in db")
+	return kp, nil
 }
 
-func GenerateNewKey() (string, string) {
+func generateNewKey() (string, string) {
 	// 生成RSA密鑰對
 	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
@@ -199,7 +220,7 @@ func GenerateNewKey() (string, string) {
 	return string(privateKeyPEMBytes), string(publicKeyPEMBytes)
 }
 
-func SaveKeysToDB(privateKey, publicKey string) error {
+func saveKeysToDB(privateKey, publicKey string) error {
 	err := repository.LDB.Create([]byte("privateKey"), []byte(privateKey))
 	if err != nil {
 		return err
