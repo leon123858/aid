@@ -1,6 +1,7 @@
 package main
 
 import (
+	"backend/services"
 	"github.com/google/uuid"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
@@ -23,6 +24,7 @@ type (
 var (
 	aidVerifier     = aidgo.NewVerifier()
 	verifyGenerator = aidgo.NewVerifyGenerator()
+	aidServerClient = services.NewAIDServerClient()
 )
 
 func init() {
@@ -62,8 +64,20 @@ func login(c echo.Context) error {
 	if err := c.Bind(req); err != nil {
 		return err
 	}
+	// check cert bind aid
+	if req.Cert.Aid.String() != c.Param("aid") {
+		return c.JSON(http.StatusBadRequest, map[string]string{"result": "aid not match"})
+	}
+	// cert hash should match hash in aid server
+	hash, err := aidServerClient.RequestHash(c.Param("aid"))
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"result": err.Error()})
+	}
+	if req.Cert.Hash() != hash {
+		return c.JSON(http.StatusBadRequest, map[string]string{"result": "hash not match"})
+	}
 	// save cert
-	err := aidVerifier.SaveCert(req.Cert)
+	err = aidVerifier.SaveCert(req.Cert)
 	if err != nil {
 		return err
 	}

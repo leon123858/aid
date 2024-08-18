@@ -8,3 +8,4 @@ build:
 
 clean:
 	rm -rf bin/$(APP_NAME)
+	rm -rf data/ldb/

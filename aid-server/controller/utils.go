@@ -42,7 +42,10 @@ func SaveCertHash(c echo.Context) error {
 		return cw.newBadRequestError("aid is not valid")
 	}
 	// if aid exists
-	if _, err := auth.LoadHash(uuid.MustParse(req.Aid)); err == nil {
+	if r, err := auth.LoadHash(uuid.MustParse(req.Aid)); err == nil {
+		if r == req.Hash {
+			return cw.newSuccess("success")
+		}
 		return cw.newBadRequestError("aid already exists")
 	}
 	// save hash

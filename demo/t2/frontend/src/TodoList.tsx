@@ -1,4 +1,4 @@
-import React, { useState} from 'react';
+import React, {useState} from 'react';
 import {Button, Checkbox, Input, List, Space} from 'antd';
 import {
     DeleteOutlined,
@@ -9,10 +9,11 @@ import {
     LogoutOutlined,
     RobotOutlined,
     ShareAltOutlined,
-    UploadOutlined
+    UploadOutlined,
+    BugOutlined,
 } from '@ant-design/icons';
 
-import { AidList, AidPreview, pemToPrivateKey} from "aid-js-sdk";
+import {AidCertHash, AidList, AidPreview, pemToPrivateKey} from "aid-js-sdk";
 import {
     generateNewAid,
     getDefaultAid,
@@ -100,9 +101,13 @@ export const TodoList: React.FC = () => {
                     const cert = defaultAidPkg.cert
                     pemToPrivateKey(defaultAidPkg.privateMsg).then(privateKey => {
                         serviceClient = new TodoApiClient(defaultAid.aid, privateKey)
-                    }).then(()=>{
+                    }).then(() => {
+                        return AidCertHash.Hash(cert)
+                    }).then((h) => {
+                        return serviceClient?.registerAidRemote(h)
+                    }).then(() => {
                         return serviceClient?.login(cert)
-                    }).then((r)=>{
+                    }).then((r) => {
                         if (!r) {
                             alert("login failed")
                             return
@@ -117,7 +122,8 @@ export const TodoList: React.FC = () => {
                 alert("aid not found");
             }
         },
-        {icon: <LogoutOutlined/>, text: 'Logout', callback: () => {
+        {
+            icon: <LogoutOutlined/>, text: 'Logout', callback: () => {
                 if (!serviceClient) {
                     alert("Already logout");
                     return
@@ -130,7 +136,8 @@ export const TodoList: React.FC = () => {
                     console.error(e)
                     alert("Logout error")
                 })
-            }},
+            }
+        },
         {
             icon: <UploadOutlined/>, text: 'Upload', callback: () => {
                 const data = getDefaultAid(aidList)?.getData("todos");
@@ -153,7 +160,8 @@ export const TodoList: React.FC = () => {
                 writeAid(aid);
             }
         },
-        {icon: <ShareAltOutlined/>, text: 'Share', callback: () => {
+        {
+            icon: <ShareAltOutlined/>, text: 'Share', callback: () => {
                 const aid = getDefaultAid(aidList)
                 if (!aid) {
                     alert("aid not found");
@@ -171,8 +179,10 @@ export const TodoList: React.FC = () => {
                 } else {
                     alert("serviceClient not found")
                 }
-        }},
-        {icon: <EyeOutlined/>, text: 'View', callback: () => {
+            }
+        },
+        {
+            icon: <EyeOutlined/>, text: 'View', callback: () => {
                 const targetAid = prompt("Enter Aid to view");
                 if (targetAid === null) {
                     alert("please input remote Aid to view");
@@ -187,7 +197,8 @@ export const TodoList: React.FC = () => {
                 } else {
                     alert("serviceClient not found")
                 }
-            }},
+            }
+        },
         {
             icon: <RobotOutlined/>, text: 'Generate Aid', callback: async () => {
                 aidList = readAidListFromLocalStorage();
@@ -198,6 +209,51 @@ export const TodoList: React.FC = () => {
                 alert("New Aid generated: 本 demo 預設只處理第一個 Aid 與 一個 cert, 不實作完整錢包");
             }
         },
+        {
+            icon: <BugOutlined/>, text: 'bug trigger', callback: () => {
+                alert("try to create an same aid with wrong cert to trigger aid server function")
+                // edit cert to trigger bug
+                const defaultAid = getDefaultAid(aidList)
+                if (!defaultAid) {
+                    alert("錢包無Aid")
+                    return
+                }
+                const defaultAidPkg = defaultAid.listCerts()[0]
+                if (!defaultAidPkg) {
+                    alert("錢包無Cert Pkg")
+                    return
+                }
+                if (!defaultAidPkg.cert) {
+                    alert("錢包無Cert")
+                    return
+                }
+                if (!defaultAidPkg.privateMsg) {
+                    alert("錢包無privateMsg")
+                    return
+                }
+                const cert = defaultAidPkg.cert
+                cert.VerifyOptions["rsa"] = "wrong key"
+
+                pemToPrivateKey(defaultAidPkg.privateMsg).then(privateKey => {
+                    serviceClient = new TodoApiClient(defaultAid.aid, privateKey)
+                }).then(() => {
+                    return AidCertHash.Hash(cert)
+                }).then((h) => {
+                    return serviceClient?.registerAidRemote(h)
+                }).then(() => {
+                    return serviceClient?.login(cert)
+                }).then((r) => {
+                    if (!r) {
+                        alert("login failed")
+                        return
+                    }
+                    alert(r.result)
+                }).catch(e => {
+                    console.error(e)
+                    alert("pemToPrivateKey error")
+                })
+            }
+        }
     ];
 
     return (

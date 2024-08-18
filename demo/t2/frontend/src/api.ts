@@ -1,4 +1,4 @@
-import { AidCert, generateSignature, AidCertHash } from 'aid-js-sdk';
+import {AidCert, generateSignature} from 'aid-js-sdk';
 
 const API_BASE_URL = 'http://localhost:8080';
 const AID_SERVER_URL = 'http://localhost:7001';
@@ -26,11 +26,8 @@ export class TodoApiClient {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ cert }),
+            body: JSON.stringify({cert}),
         });
-
-        let x = await AidCertHash.Hash(cert);
-        console.log(x);
 
         if (!response.ok) {
             throw new Error('Login failed');
@@ -99,14 +96,14 @@ export class TodoApiClient {
         return response.json();
     }
 
-    async registerAidRemote(aidStr: string, certHash: string): Promise<{ result: string }> {
+    async registerAidRemote(certHash: string): Promise<{ result: string }> {
         if (!this.aid) throw new Error('AID is not set');
         const response = await fetch(`${AID_SERVER_URL}/register/cert`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ aid: aidStr, hash: certHash }),
+            body: JSON.stringify({aid: this.aid, hash: certHash}),
         });
 
         if (!response.ok) {
