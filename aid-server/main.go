@@ -25,5 +25,5 @@ func main() {
 	ac.GET("/get/key", controller.GetServerPublicKey)
 	ac.POST("/sign/cert", controller.AskServerSignCert)
 	// Start server
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":7001"))
 }
