@@ -1,4 +1,5 @@
 # aid
+
 this project include aid server implementation and full stack demo.
 
 ## Concept
@@ -40,8 +41,13 @@ four type of aid system:
 - also can know as a mixture of type2 and type3.
 
 related project:
+
 - [aid-server](https://github.com/leon123858/aid)
 - [aid-wallet](https://github.com/leon123858/aidjs)
 - [aid-service](https://github.com/leon123858/aidgo)
 - [OurChain](https://github.com/leon123858/OurChain)
 - [OurChain-Agent](https://github.com/leon123858/ourchain-agent)
+
+## TODO
+
+fork this project [link](https://github.com/goauthentik/authentik) and add a protocol named `aid` to it.
