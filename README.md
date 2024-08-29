@@ -1,6 +1,6 @@
 # aid
 
-this project include aid server implementation and full stack demo.
+this project include [aid server implementation](./aid-server) and [full stack demo](./demo).
 
 ## Concept
 
